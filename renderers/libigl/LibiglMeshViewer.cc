@@ -36,6 +36,7 @@ void LibiglMeshViewer::set_modelview(const Matrix4f& _modelview) {
 
 void LibiglMeshViewer::set_mesh(
     const Eigen::MatrixXd& _V, const Eigen::MatrixXi& _F) {
+  viewer_.data.clear();
   viewer_.data.set_mesh(_V, _F);
 }
 

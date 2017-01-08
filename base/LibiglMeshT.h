@@ -33,7 +33,7 @@ class LibiglMeshT {
     LibiglMeshT();
     LibiglMeshT(LibiglMeshRendererT* _renderer);
 
-    int n_verices() const { return V_.rows(); }
+    int n_vertices() const { return V_.rows(); }
     int n_faces() const { return F_.rows(); }
 
     bool read_mesh(const std::string& _filename);

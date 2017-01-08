@@ -86,6 +86,7 @@ include_directories(${LIBIGL_INCLUDE_DIRS})
 add_definitions(${LIBIGL_DEFINITIONS})
 
 include_directories(
+        "${CMAKE_CURRENT_SOURCE_DIR}"
         "${CMAKE_CURRENT_SOURCE_DIR}/base"
         "${CMAKE_CURRENT_SOURCE_DIR}/include"
         "${CMAKE_CURRENT_SOURCE_DIR}/utils")
@@ -110,13 +111,13 @@ else()
 endif()
 
 # Add libraries
-find_package(gflags REQUIRED)
+find_package(GFlags REQUIRED)
 if (NOT GFLAGS_FOUND)
     message(FATAL_ERROR "gflags not found")
 endif()
-include_directories(${GFLAGS_INCLUDE_DIR})
+include_directories(${GFLAGS_INCLUDE_DIRS})
 
-find_package(glog REQUIRED)
+find_package(Glog REQUIRED)
 if (NOT GLOG_FOUND)
     message(FATAL_ERROR "glog not found")
 endif()
@@ -130,5 +131,5 @@ if (USE_OSMESA)
     target_link_libraries(${PROJECT_NAME} ${OSMESA_LIBRARY})
 endif()
 
-target_link_libraries(${PROJECT_NAME} ${GFLAGS_LIBRARY})
+target_link_libraries(${PROJECT_NAME} ${GFLAGS_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} ${GLOG_LIBRARIES})
