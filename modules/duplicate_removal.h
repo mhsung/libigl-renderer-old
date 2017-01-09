@@ -138,6 +138,7 @@ IGL_INLINE void igl::duplicated_face_removal(
   // Assume triangular mesh.
   assert(F.cols() == 3);
 
+  // Sort vertex indices of each face. The order of vertices is ignored.
   Eigen::PlainObjectBase<DerivedF> F_col_sorted;
   Eigen::MatrixXi col_I;
   igl::sort(F, 2, true, F_col_sorted, col_I);
