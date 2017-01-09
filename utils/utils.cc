@@ -5,10 +5,10 @@
 // obtain one at http://mozilla.org/MPL/2.0/.
 //
 
-#include "utils.h"
+#include <utils/utils.h>
 
 #include <cmath>
-#include <simplerandom.h>
+#include <utils/simplerandom/simplerandom.h>
 
 
 namespace Utils {
@@ -74,6 +74,11 @@ void random_label_rgb_color(
     const int _label, Eigen::Vector3f* _color) {
   CHECK_NOTNULL(_color);
   CHECK_GE(_label, 0);
+
+  if (_label == 0) {
+    _color->setZero();
+    return;
+  }
 
   // Reference:
   // http://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/

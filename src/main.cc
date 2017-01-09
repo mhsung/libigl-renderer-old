@@ -7,7 +7,7 @@
 
 #define GLOG_NO_ABBREVIATED_SEVERITIES
 
-#include "google_tools.h"
+#include <utils/google_tools.h>
 #include "LibiglMesh.h"
 #ifdef USE_OSMESA
 #include "OSMesaMeshRenderer.h"

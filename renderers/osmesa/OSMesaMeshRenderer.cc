@@ -8,11 +8,11 @@
 #include "OSMesaMeshRenderer.h"
 
 #include <iostream>
-#include <google_tools.h>
 #include <igl/material_colors.h>
 #include <igl/per_face_normals.h>
 #include <igl/per_vertex_normals.h>
 #include <igl/png/writePNG.h>
+#include <utils/google_tools.h>
 
 
 OSMesaMeshRenderer::OSMesaMeshRenderer(const int _width, const int _height)

@@ -20,7 +20,7 @@
 #include <Eigen/Core>
 #include <Eigen/LU>
 
-#include "google_tools.h"
+#include <utils/google_tools.h>
 
 using namespace Eigen;
 

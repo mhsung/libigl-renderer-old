@@ -10,8 +10,8 @@
 #include <iostream>
 #include <Eigen/Geometry>
 #include <igl/frustum.h>
-#include "google_tools.h"
-#include "utils.h"
+#include <utils/google_tools.h>
+#include <utils/utils.h>
 
 
 const float kTranslationDistance = 2.4f;

@@ -7,12 +7,12 @@
 
 #include "LibiglMeshT.h"
 
-#include <filesystem/path.h>
 #include <igl/readOBJ.h>
 #include <igl/readOFF.h>
 #include <igl/readPLY.h>
-#include "google_tools.h"
-#include "utils.h"
+#include <utils/filesystem/path.h>
+#include <utils/google_tools.h>
+#include <utils/utils.h>
 
 // Define input variables.
 DEFINE_string(mesh, "", "mesh file.");

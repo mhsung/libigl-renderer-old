@@ -88,13 +88,15 @@ add_definitions(${LIBIGL_DEFINITIONS})
 include_directories(
         "${CMAKE_CURRENT_SOURCE_DIR}"
         "${CMAKE_CURRENT_SOURCE_DIR}/base"
-        "${CMAKE_CURRENT_SOURCE_DIR}/include"
-        "${CMAKE_CURRENT_SOURCE_DIR}/utils")
+        "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 FILE(GLOB SRC_FILES
         "${CMAKE_CURRENT_SOURCE_DIR}/base/*.cc"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cc"
-        "${CMAKE_CURRENT_SOURCE_DIR}/utils/*.cc")
+        "${CMAKE_CURRENT_SOURCE_DIR}/utils/*.cc"
+        "${CMAKE_CURRENT_SOURCE_DIR}/utils/*/*.c"
+        "${CMAKE_CURRENT_SOURCE_DIR}/utils/*/*.cc"
+        "${CMAKE_CURRENT_SOURCE_DIR}/utils/*/*.cpp")
 
 if (USE_OSMESA)
     add_definitions(-DUSE_OSMESA)

@@ -10,7 +10,7 @@
 
 #include <string>
 #include <Eigen/Core>
-#include "google_tools.h"
+#include <utils/google_tools.h>
 #include "LibiglMeshRendererT.h"
 
 using namespace Eigen;

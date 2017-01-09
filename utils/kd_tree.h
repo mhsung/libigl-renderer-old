@@ -10,8 +10,8 @@
 
 #include <memory>
 #include <Eigen/Core>
-#include <nanoflann/nanoflann.hpp>
-#include "google_tools.h"
+#include <utils/google_tools.h>
+#include <utils/nanoflann/nanoflann.hpp>
 
 using namespace Eigen;
 
