@@ -7,6 +7,7 @@ vnk@microsoft.com
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wwritable-strings"
+#pragma GCC diagnostic ignored "-Wwrite-strings"
 
 #ifndef __MRFENERGY_H__
 #define __MRFENERGY_H__

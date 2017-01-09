@@ -22,7 +22,7 @@ namespace igl
 }
 
 //#ifndef IGL_STATIC_LIBRARY
-//#  include "edge_lengths.cpp"
+//#  include "edge_lengths_simple.cpp"
 //#endif
 
 

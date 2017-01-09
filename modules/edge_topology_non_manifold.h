@@ -33,7 +33,7 @@ template <typename DerivedV, typename DerivedF>
 }
 
 //#ifndef IGL_STATIC_LIBRARY
-//#  include "edge_topology.cpp"
+//#  include "edge_topology_non_manifold.cpp"
 //#endif
 
 

@@ -23,17 +23,27 @@ namespace KdTree {
  * // D = Data points, Q = Query points (in each row).
  * // NOTE: Do not delete D before retrieving closest points.
  * MatrixXd D, Q;
- * KdTree::::KdTreeXd tree(P);
- * const VectorXi ret = KdTree::::find_closest_points(tree, Q);
+ * KdTree::KdTreeXd tree(P);
+ * VectorXi Q_to_P_idxs;
+ * VectorXd Q_to_P_sqr_dists;
+ * KdTree::::find_closest_points(tree, Q, &Q_to_P_idxs, &Q_to_P_sqr_dists);
  */
 
 // Reference:
 // https://github.com/jlblancoc/nanoflann/blob/master/tests/test_main.cpp
 
-template<typename Scalar,int Rows,int Cols>
+template<typename Derived>
 struct KdTree {
+  typedef typename Derived::Scalar Scalar;
+  typedef nanoflann::KDTreeSingleIndexAdaptor<
+      nanoflann::L2_Simple_Adaptor<Scalar, KdTree<Derived> >,
+      KdTree<Derived> > KdTreeAdaptor;
+
+  const MatrixBase<Derived>& data_pts_;
+  KdTreeAdaptor adaptor_;
+
   // @_data_pts: N-dimensional data points (each row, N = 2, 3, or 4).
-  KdTree(const Matrix<Scalar, Dynamic, Cols>& _data_pts)
+  KdTree(const MatrixBase<Derived>& _data_pts)
       : data_pts_(_data_pts),
         adaptor_(_data_pts.cols(), *this,
                  nanoflann::KDTreeSingleIndexAdaptorParams(10)) {
@@ -43,13 +53,6 @@ struct KdTree {
   }
 
   int dim() const { return data_pts_.cols(); }
-
-  typedef nanoflann::KDTreeSingleIndexAdaptor<
-      nanoflann::L2_Simple_Adaptor<Scalar, KdTree<Scalar, Rows, Cols> >,
-      KdTree<Scalar, Rows, Cols>> KdTreeAdaptor;
-
-  const Matrix<Scalar, Rows, Cols>& data_pts_;
-  KdTreeAdaptor adaptor_;
 
   // Template functions required in nanoflann.
   inline size_t kdtree_get_point_count() const { return data_pts_.rows(); }
@@ -74,36 +77,53 @@ struct KdTree {
   bool kdtree_get_bbox(BBOX& /* bb*/ ) const { return false; }
 };
 
-typedef KdTree<float, Dynamic, Dynamic> KdTreeXf;
-typedef KdTree<double, Dynamic, Dynamic> KdTreeXd;
+typedef KdTree<Eigen::Matrix<float, -1, -1, 0, -1, -1>> KdTreeXf;
+typedef KdTree<Eigen::Matrix<double, -1, -1, 0, -1, -1>> KdTreeXd;
 
 
 // @_tree: k-d Tree.
 // @_query_pts: N-dimensional query points (each row, N = 2, 3, or 4).
 // @return: Closest point indices.
-template<typename Scalar,int Rows1,int Cols1,int Rows2,int Cols2>
-VectorXi find_closest_points(
-    KdTree<Scalar, Rows1, Cols1>& _tree,
-    const Matrix<Scalar, Rows2, Cols2>& _query_pts) {
+template<
+    typename DerivedT,
+    typename DerivedQ,
+    typename DerivedI,
+    typename DerivedD>
+void find_k_closest_points(
+    const KdTree<DerivedT>& _tree,
+    const MatrixBase<DerivedQ>& _query_pts,
+    Eigen::PlainObjectBase<DerivedI>* _ret_idxs,
+    Eigen::PlainObjectBase<DerivedD>* _sqr_dists,
+    const int max_K = 1) {
+  CHECK_NOTNULL(_ret_idxs);
+  CHECK_NOTNULL(_sqr_dists);
   CHECK_EQ(_query_pts.cols(), _tree.dim())
   << "Data and query point dimensions do not match.";
 
+  typedef typename DerivedT::Scalar ScalarT;
+  typedef typename DerivedD::Scalar ScalarD;
+  const int K = std::min(max_K, (int)_tree.kdtree_get_point_count());
+
   const int num_query = _query_pts.rows();
-  VectorXi ret(num_query);
+  _ret_idxs->resize(num_query, K);
+  _sqr_dists->resize(num_query, K);
 
   for (int i = 0; i < num_query; ++i) {
     // Find the closest data point.
-    const Matrix<Scalar, 1, Dynamic> query_pt = _query_pts.row(i);
-    size_t ret_idx;
-    Scalar sqr_dist;
-    nanoflann::KNNResultSet<Scalar> results(1);
-    results.init(&ret_idx, &sqr_dist);
+    const Matrix<ScalarT, 1, Dynamic> query_pt =
+        _query_pts.row(i).template cast<ScalarT>();
+    std::vector<size_t> i_ret_idxs(K);
+    std::vector<ScalarT> i_sqr_dists(K);
+    nanoflann::KNNResultSet<ScalarT> results(K);
+    results.init(&i_ret_idxs[0], &i_sqr_dists[0]);
     CHECK(_tree.adaptor_.findNeighbors(
         results, query_pt.data(), nanoflann::SearchParams(10)));
-    ret[i] = ret_idx;
-  }
 
-  return ret;
+    for (int j = 0; j < K; ++j) {
+      (*_ret_idxs)(i, j) = i_ret_idxs[j];
+      (*_sqr_dists)(i, j) = (ScalarD)i_sqr_dists[j];
+    }
+  }
 }
 
 }
