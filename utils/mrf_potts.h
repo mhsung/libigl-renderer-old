@@ -17,14 +17,17 @@
 using namespace Eigen;
 
 
-namespace TRWSEigen {
+namespace MRFEigen {
+
+typedef enum {TRW_S, BP} Solver;
 
 // @U: Unary terms (U(node, label) = cost).
 // @B: Binary terms (B(node1, node2) = cost).
 template<typename Derived,typename SType>
-VectorXi mrf_solver_potts(
+VectorXi solve_mrf_potts(
     const Eigen::PlainObjectBase<Derived>& U,
     Eigen::SparseMatrix<SType>& B,
+    const Solver& solver,
     const int max_iter = 50) {
   // Copied from 'utils/TRW_S-v1.3/typePotts.h'
   // Reference:
@@ -66,8 +69,11 @@ VectorXi mrf_solver_potts(
 
   /////////////////////// TRW-S algorithm //////////////////////
   options.m_iterMax = max_iter; // maximum number of iterations
-  mrf->Minimize_TRW_S(options, lowerBound, energy);
-  //mrf->Minimize_BP(options, energy);
+  if (solver == TRW_S) {
+    mrf->Minimize_TRW_S(options, lowerBound, energy);
+  } else if (solver == BP) {
+    mrf->Minimize_BP(options, energy);
+  } else assert(false);
 
   // read solution
   VectorXi ret(nodeNum);

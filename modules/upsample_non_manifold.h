@@ -68,7 +68,7 @@ IGL_INLINE void igl::upsample_non_manifold(
   MatrixXi EV;
   MatrixXi FE;
   vector<list<int> > EF;
-  igl::edge_topology_non_manifold(V, F, EV, FE, EF);
+  igl::edge_topology_non_manifold(F, EV, FE, EF);
 
   const int nV = V.rows();
   const int nE = EV.rows();

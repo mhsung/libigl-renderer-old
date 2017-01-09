@@ -20,12 +20,11 @@ namespace igl
   // mesh)
   //
   // Output:
-  // EV  : #Ex2, Stores the edge description as pair of indices to vertices
+  // EV : #Ex2, Stores the edge description as pair of indices to vertices
   // FE : #Fx3, Stores the Triangle-Edge relation
   // EF : #Exk: Stores the Edge-Triangle relation
-template <typename DerivedV, typename DerivedF>
+template <typename DerivedF>
   IGL_INLINE void edge_topology_non_manifold(
-    const Eigen::PlainObjectBase<DerivedV>& V,
     const Eigen::PlainObjectBase<DerivedF>& F,
     Eigen::MatrixXi& EV,
     Eigen::MatrixXi& FE,
@@ -37,9 +36,8 @@ template <typename DerivedV, typename DerivedF>
 //#endif
 
 
-template <typename DerivedV, typename DerivedF>
+template <typename DerivedF>
 IGL_INLINE void igl::edge_topology_non_manifold(
-    const Eigen::PlainObjectBase<DerivedV>& V,
     const Eigen::PlainObjectBase<DerivedF>& F,
     Eigen::MatrixXi& EV,
     Eigen::MatrixXi& FE,

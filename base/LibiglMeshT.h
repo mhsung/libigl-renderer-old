@@ -55,12 +55,12 @@ class LibiglMeshT {
     // Mesh properties.
     MatrixXd V_;
     MatrixXi F_;
-    //MatrixXf VC_;
+    MatrixXf VC_;
     MatrixXf FC_;
-    //VectorXi VL_;
+    VectorXi VL_;
     VectorXi FL_;
-    //MatrixXd VN_;
-    //MatrixXi FN_;
+    MatrixXd VN_;
+    MatrixXd FN_;
 
     Vector3d bb_min_;
     Vector3d bb_max_;
