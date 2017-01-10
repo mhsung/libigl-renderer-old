@@ -3,8 +3,8 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License 
 // v. 2.0. If a copy of the MPL was not distributed with this file, You can 
 // obtain one at http://mozilla.org/MPL/2.0/.
-#ifndef IGL_DUPLICATES_REMOVAL_H
-#define IGL_DUPLICATES_REMOVAL_H
+#ifndef IGL_REMOVE_DUPLICATES_CUSTOM_H
+#define IGL_REMOVE_DUPLICATES_CUSTOM_H
 
 #include <igl/igl_inline.h>
 #include <igl/sort.h>
@@ -14,10 +14,18 @@
 
 namespace igl
 {
+  // NOTE:
+  // See 'remove_duplicate_vertices.h' and 'resolve_duplicated_faces.h' as well.
+  // 'remove_duplicate_vertices_custom()' function can be replaced with
+  // 'remove_duplicate_vertices()'.
+  // Didn't check whether both work in the same way.
+  // 'remove_duplicate_faces_custom()' works differently with
+  // 'resolve_duplicated_faces()'.
+
   template <
     typename DerivedV,
     typename DerivedF>
-  IGL_INLINE void duplicated_vertex_removal(
+  IGL_INLINE void remove_duplicate_vertices_custom(
     const Eigen::PlainObjectBase<DerivedV>& V,
     const Eigen::PlainObjectBase<DerivedF>& F,
     Eigen::PlainObjectBase<DerivedV>& newV,
@@ -28,32 +36,32 @@ namespace igl
   template <
     typename MatV,
     typename MatF>
-  IGL_INLINE void duplicated_vertex_removal(
+  IGL_INLINE void remove_duplicate_vertices_custom(
     MatV& V,
     MatF& F,
     const float squared_eps = 1.0E-8f,
     const int max_K = 16);
 
   template <typename DerivedF>
-  IGL_INLINE void duplicated_face_removal(
+  IGL_INLINE void remove_duplicate_faces_custom(
     const Eigen::PlainObjectBase<DerivedF>& F,
     Eigen::PlainObjectBase<DerivedF>& newF,
     const int max_K = 16);
 
   template <typename MatF>
-  IGL_INLINE void duplicated_face_removal(
+  IGL_INLINE void remove_duplicate_faces_custom(
     MatF& F, const int max_K = 16);
 }
 
 //#ifndef IGL_STATIC_LIBRARY
-//#  include "duplicate_removal.cpp"
+//#  include "remove_duplicates_custom.cpp"
 //#endif
 
 
 template <
     typename DerivedV,
     typename DerivedF>
-IGL_INLINE void igl::duplicated_vertex_removal(
+IGL_INLINE void igl::remove_duplicate_vertices_custom(
     const Eigen::PlainObjectBase<DerivedV>& V,
     const Eigen::PlainObjectBase<DerivedF>& F,
     Eigen::PlainObjectBase<DerivedV>& newV,
@@ -117,7 +125,7 @@ IGL_INLINE void igl::duplicated_vertex_removal(
 template <
     typename MatV,
     typename MatF>
-IGL_INLINE void igl::duplicated_vertex_removal(
+IGL_INLINE void igl::remove_duplicate_vertices_custom(
     MatV& V,
     MatF& F,
     const float squared_eps,
@@ -125,11 +133,11 @@ IGL_INLINE void igl::duplicated_vertex_removal(
 {
   const MatV V_copy = V;
   const MatF F_copy = F;
-  duplicated_vertex_removal(V_copy,F_copy,V,F,squared_eps,max_K);
+  remove_duplicate_vertices_custom(V_copy,F_copy,V,F,squared_eps,max_K);
 }
 
 template <typename DerivedF>
-IGL_INLINE void igl::duplicated_face_removal(
+IGL_INLINE void igl::remove_duplicate_faces_custom(
     const Eigen::PlainObjectBase<DerivedF>& F,
     Eigen::PlainObjectBase<DerivedF>& newF,
     const int max_K)
@@ -182,11 +190,11 @@ IGL_INLINE void igl::duplicated_face_removal(
 };
 
 template <typename MatF>
-IGL_INLINE void igl::duplicated_face_removal(
+IGL_INLINE void igl::remove_duplicate_faces_custom(
     MatF& F, const int max_K)
 {
   const MatF F_copy = F;
-  duplicated_face_removal(F_copy,F,max_K);
+  remove_duplicate_faces_custom(F_copy,F,max_K);
 }
 
 #endif
