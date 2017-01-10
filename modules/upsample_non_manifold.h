@@ -190,7 +190,7 @@ IGL_INLINE void igl::upsample_non_manifold(
 {
   const MatV V_copy = V;
   const MatF F_copy = F;
-  return upsample_non_manifold(V_copy,F_copy,V,F,min_edge_length);
+  upsample_non_manifold(V_copy,F_copy,V,F,min_edge_length);
 }
 
 #endif

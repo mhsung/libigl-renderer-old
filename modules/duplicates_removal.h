@@ -3,8 +3,8 @@
 // This Source Code Form is subject to the terms of the Mozilla Public License 
 // v. 2.0. If a copy of the MPL was not distributed with this file, You can 
 // obtain one at http://mozilla.org/MPL/2.0/.
-#ifndef IGL_DUPLICATE_REMOVAL_H
-#define IGL_DUPLICATE_REMOVAL_H
+#ifndef IGL_DUPLICATES_REMOVAL_H
+#define IGL_DUPLICATES_REMOVAL_H
 
 #include <igl/igl_inline.h>
 #include <igl/sort.h>
@@ -33,7 +33,6 @@ namespace igl
     MatF& F,
     const float squared_eps = 1.0E-8f,
     const int max_K = 16);
-
 
   template <typename DerivedF>
   IGL_INLINE void duplicated_face_removal(
@@ -107,7 +106,7 @@ IGL_INLINE void igl::duplicated_vertex_removal(
     newV.row(vid) = V.row(new_to_old_vids[vid]);
   }
 
-  newF.resize(F.rows(), V.cols());
+  newF.resize(F.rows(), F.cols());
   for (int fid = 0; fid < F.rows(); ++fid) {
     newF.row(fid) << old_to_new_vids[ F.row(fid)[0] ],
         old_to_new_vids[ F.row(fid)[1] ],
@@ -126,7 +125,7 @@ IGL_INLINE void igl::duplicated_vertex_removal(
 {
   const MatV V_copy = V;
   const MatF F_copy = F;
-  return duplicated_vertex_removal(V_copy,F_copy,V,F,squared_eps,max_K);
+  duplicated_vertex_removal(V_copy,F_copy,V,F,squared_eps,max_K);
 }
 
 template <typename DerivedF>
@@ -187,7 +186,7 @@ IGL_INLINE void igl::duplicated_face_removal(
     MatF& F, const int max_K)
 {
   const MatF F_copy = F;
-  return duplicated_face_removal(F_copy,F,max_K);
+  duplicated_face_removal(F_copy,F,max_K);
 }
 
 #endif

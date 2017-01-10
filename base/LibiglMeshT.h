@@ -53,6 +53,8 @@ class LibiglMeshT {
     void post_processing();
 
     // Mesh properties.
+    std::string mesh_name_;   // Includes extension.
+
     MatrixXd V_;
     MatrixXi F_;
     MatrixXf VC_;

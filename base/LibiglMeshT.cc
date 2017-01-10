@@ -7,9 +7,7 @@
 
 #include "LibiglMeshT.h"
 
-#include <igl/readOBJ.h>
-#include <igl/readOFF.h>
-#include <igl/readPLY.h>
+#include <igl/read_triangle_mesh.h>
 #include <utils/filesystem/path.h>
 #include <utils/google_tools.h>
 #include <utils/utils.h>
@@ -37,26 +35,11 @@ LibiglMeshT::LibiglMeshT(LibiglMeshRendererT* _renderer)
 }
 
 bool LibiglMeshT::read_mesh(const std::string& _filename) {
-  filesystem::path path(_filename);
-  if (path.extension() == "obj" || path.extension() == "OBJ") {
-    if (!igl::readOBJ(_filename, V_, F_)) {
-      LOG(WARNING) << "Can't read the file: '" << _filename << "'";
-      return false;
-    }
-  } else if (path.extension() == "off" || path.extension() == "OFF") {
-    if (!igl::readOFF(_filename, V_, F_)) {
-      LOG(WARNING) << "Can't read the file: '" << _filename << "'";
-      return false;
-    }
-  } else if (path.extension() == "ply" || path.extension() == "PLY") {
-    if (!igl::readPLY(_filename, V_, F_)) {
-      LOG(WARNING) << "Can't read the file: '" << _filename << "'";
-      return false;
-    }
-  } else {
-    LOG(WARNING) << "Unsupported format: '" << _filename << "'";
+  if (!igl::read_triangle_mesh(_filename, V_, F_)) {
+    LOG(WARNING) << "Can't read the file: '" << _filename << "'";
     return false;
   }
+  mesh_name_ = filesystem::path(_filename).filename();
 
   update_bounding_box();
 
