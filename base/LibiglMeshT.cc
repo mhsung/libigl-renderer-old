@@ -23,7 +23,7 @@ DEFINE_double(theta_deg, 0.0, "theta (degree). "
     "ignored if 'modelview_matrix' is set");
 DEFINE_string(projection_matrix, "", "projection matrix file.");
 DEFINE_string(modelview_matrix, "", "modelview matrix file.");
-DEFINE_string(bounding_box, "", "bounding box file.");
+DEFINE_string(bbox, "", "bounding box file.");
 DEFINE_string(snapshot, "", "snapshot file.");
 
 
@@ -100,8 +100,9 @@ void LibiglMeshT::update_bounding_box() {
 }
 
 bool LibiglMeshT::write_bounding_box(const std::string& _filename) {
+  const double bbox_diagonal = (bb_max_ - bb_min_).norm();
 	Eigen::VectorXd bb_info(4);
-  bb_info << center_, radius_;
+  bb_info << center_, bbox_diagonal;
   if (!Utils::write_eigen_matrix_to_csv(_filename, bb_info.transpose())) {
     return false;
   }
@@ -146,8 +147,8 @@ void LibiglMeshT::pre_processing() {
     }
   }
 
-	if (FLAGS_bounding_box != "") {
-		if (!write_bounding_box(FLAGS_bounding_box)) {
+	if (FLAGS_bbox != "") {
+		if (!write_bounding_box(FLAGS_bbox)) {
 			return;
 		}
 	}
