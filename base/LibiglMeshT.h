@@ -37,11 +37,13 @@ class LibiglMeshT {
     int n_faces() const { return F_.rows(); }
 
     bool read_mesh(const std::string& _filename);
+
     bool read_face_labels(const std::string& _filename);
     bool write_face_labels(const std::string& _filename);
+    void set_face_label_colors();
 
     void update_bounding_box();
-    void set_face_label_colors();
+    bool write_bounding_box(const std::string& _filename);
 
     void parse_arguments_and_run();
 

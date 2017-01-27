@@ -23,6 +23,7 @@ DEFINE_double(theta_deg, 0.0, "theta (degree). "
     "ignored if 'modelview_matrix' is set");
 DEFINE_string(projection_matrix, "", "projection matrix file.");
 DEFINE_string(modelview_matrix, "", "modelview matrix file.");
+DEFINE_string(bounding_box, "", "bounding box file.");
 DEFINE_string(snapshot, "", "snapshot file.");
 
 
@@ -71,13 +72,6 @@ bool LibiglMeshT::write_face_labels(const std::string& _filename) {
   return true;
 }
 
-void LibiglMeshT::update_bounding_box() {
-  bb_min_ = V_.colwise().minCoeff();
-  bb_max_ = V_.colwise().maxCoeff();
-  center_ = 0.5 * (bb_min_ + bb_max_);
-  radius_ = 0.5 * (bb_max_ - bb_min_).norm();
-}
-
 void LibiglMeshT::set_face_label_colors() {
   if (FL_.rows() != F_.rows()) {
     LOG(WARNING) << "Number of face labels does not match number of faces.";
@@ -96,6 +90,25 @@ void LibiglMeshT::set_face_label_colors() {
   } else {
     renderer_->set_face_colors(FC_);
   }
+}
+
+void LibiglMeshT::update_bounding_box() {
+  bb_min_ = V_.colwise().minCoeff();
+  bb_max_ = V_.colwise().maxCoeff();
+  center_ = 0.5 * (bb_min_ + bb_max_);
+  radius_ = 0.5 * (bb_max_ - bb_min_).norm();
+}
+
+bool LibiglMeshT::write_bounding_box(const std::string& _filename) {
+	const Eigen::Vector3d bb_size = bb_max_ - bb_min_;
+	Eigen::MatrixXd bb_info(2, 3);
+	bb_info.row(0) = center_.transpose();
+	bb_info.row(1) = bb_size.transpose();
+
+  if (!Utils::write_eigen_matrix_to_csv(_filename, bb_info)) {
+    return false;
+  }
+  return true;
 }
 
 void LibiglMeshT::pre_processing() {
@@ -135,6 +148,12 @@ void LibiglMeshT::pre_processing() {
       return;
     }
   }
+
+	if (FLAGS_bounding_box != "") {
+		if (!write_bounding_box(FLAGS_bounding_box)) {
+			return;
+		}
+	}
 }
 
 void LibiglMeshT::post_processing() {
