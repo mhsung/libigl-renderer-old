@@ -100,12 +100,9 @@ void LibiglMeshT::update_bounding_box() {
 }
 
 bool LibiglMeshT::write_bounding_box(const std::string& _filename) {
-	const Eigen::Vector3d bb_size = bb_max_ - bb_min_;
-	Eigen::MatrixXd bb_info(2, 3);
-	bb_info.row(0) = center_.transpose();
-	bb_info.row(1) = bb_size.transpose();
-
-  if (!Utils::write_eigen_matrix_to_csv(_filename, bb_info)) {
+	Eigen::VectorXd bb_info(4);
+  bb_info << center_, radius_;
+  if (!Utils::write_eigen_matrix_to_csv(_filename, bb_info.transpose())) {
     return false;
   }
   return true;
