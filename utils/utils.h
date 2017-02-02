@@ -16,6 +16,7 @@
 #include <map>
 #include <memory>
 #include <set>
+#include <stdexcept>
 #include <string>
 #include <Eigen/Core>
 #include <Eigen/LU>

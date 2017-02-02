@@ -138,6 +138,16 @@ public:
 #endif
     }
 
+    std::string basename() const {
+        if (empty())
+            return "";
+        const std::string &name = filename();
+        size_t pos = name.find_last_of(".");
+        if (pos == std::string::npos)
+            return name;
+        return name.substr(0, pos);
+    }
+
     std::string extension() const {
         const std::string &name = filename();
         size_t pos = name.find_last_of(".");
