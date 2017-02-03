@@ -40,59 +40,60 @@ void random_label_rgb_color(
 // @_vec: Input vector.
 // @_query: Query value.
 // @return: Vecter indices with query value.
-template<typename T>
+template <typename T>
 VectorXi find(const Matrix<T, Dynamic, 1>& _vec, const T _query);
 
 // @_vec: Input vector.
 // @return: Unique element vector.
-template<typename T>
+template <typename T>
 Matrix<T, Dynamic, 1> unique(const Matrix<T, Dynamic, 1>& _vec);
 
 // @_vec: Input vector.
 // @_unique: (Output) Unique element vector.
 // @_counts: (Output) Counts of unique elements.
-template<typename T>
+template <typename T>
 void count_occurrences(const Matrix<T, Dynamic, 1>& _vec,
                        Matrix<T, Dynamic, 1>* _unique, VectorXi* _counts);
 
 // @_mat: Input matrix.
 // @_indices: Row indices to slice.
 // @_sub_mat: Sliced sub matrix.
-template<typename Scalar, int Rows, int Columns>
+template <typename Scalar, int Rows, int Columns>
 Matrix<Scalar, Rows, Columns> slice_rows(
     const Matrix<Scalar, Rows, Columns>& _mat, const VectorXi& _idxs);
 
 // @_mat: Input matrix.
 // @_indices: Column indices to slice.
 // @_sub_mat: Sliced sub matrix.
-template<typename Scalar, int Rows, int Columns>
+template <typename Scalar, int Rows, int Columns>
 Matrix<Scalar, Rows, Columns> slice_columns(
     const Matrix<Scalar, Rows, Columns>& _mat, const VectorXi& _idxs);
 
 
 // -- Eigen I/O utils -- //
 
-template<typename T>
+template <typename T>
 bool write_sequence(
     const std::string& _filepath, const T& _sequence);
 
-template<typename Derived>
-bool read_eigen_matrix_from_csv(
+template <typename Derived>
+bool read_eigen_matrix_from_file(
     const std::string& _filepath,
     MatrixBase<Derived>* _matrix,
     const char _delimiter = ',');
 
-template<typename Derived>
-bool write_eigen_matrix_to_csv(
+template <typename Derived>
+bool write_eigen_matrix_to_file(
     const std::string& _filepath,
-    const MatrixBase<Derived>& _matrix);
+    const MatrixBase<Derived>& _matrix,
+    const char _delimiter = ',');
 
-template<typename Derived>
+template <typename Derived>
 bool read_eigen_matrix_from_binary(
     const std::string& _filepath,
     MatrixBase<Derived>* _matrix);
 
-template<typename Derived>
+template <typename Derived>
 bool write_eigen_matrix_to_binary(
     const std::string& _filepath,
     const MatrixBase<Derived>& _matrix);
@@ -100,7 +101,7 @@ bool write_eigen_matrix_to_binary(
 
 // -- Template function implementation -- //
 
-template<typename T>
+template <typename T>
 VectorXi find(const Matrix<T, Dynamic, 1>& _vec, const T _query) {
   VectorXi ret;
 
@@ -118,7 +119,7 @@ VectorXi find(const Matrix<T, Dynamic, 1>& _vec, const T _query) {
   return ret;
 }
 
-template<typename T>
+template <typename T>
 Matrix<T, Dynamic, 1> unique(const Matrix<T, Dynamic, 1>& _vec) {
   std::set<T> elements;
   for (int i = 0; i < _vec.size(); ++i) {
@@ -134,7 +135,7 @@ Matrix<T, Dynamic, 1> unique(const Matrix<T, Dynamic, 1>& _vec) {
   return ret;
 }
 
-template<typename T>
+template <typename T>
 void count_occurrences(const Matrix<T, Dynamic, 1>& _vec,
                        Matrix<T, Dynamic, 1>* _unique, VectorXi* _counts) {
   CHECK_NOTNULL(_unique);
@@ -154,7 +155,7 @@ void count_occurrences(const Matrix<T, Dynamic, 1>& _vec,
   }
 }
 
-template<typename Scalar, int Rows, int Columns>
+template <typename Scalar, int Rows, int Columns>
 Matrix<Scalar, Rows, Columns> slice_rows(
     const Matrix<Scalar, Rows, Columns>& _mat, const VectorXi& _idxs) {
   const int n = _idxs.size();
@@ -172,7 +173,7 @@ Matrix<Scalar, Rows, Columns> slice_rows(
   return ret;
 }
 
-template<typename Scalar, int Rows, int Columns>
+template <typename Scalar, int Rows, int Columns>
 Matrix<Scalar, Rows, Columns> slice_columns(
     const Matrix<Scalar, Rows, Columns>& _mat, const VectorXi& _idxs) {
   const int n = _idxs.size();
@@ -190,7 +191,7 @@ Matrix<Scalar, Rows, Columns> slice_columns(
   return ret;
 }
 
-template<typename Scalar>
+template <typename Scalar>
 Scalar string_to_number(const std::string& _str) {
   if (_str.size() == 0) return 0;
   std::istringstream sstr(_str);
@@ -199,7 +200,7 @@ Scalar string_to_number(const std::string& _str) {
   return value;
 }
 
-template<typename T>
+template <typename T>
 bool write_sequence(
     const std::string& _filepath, const T& _sequence) {
   std::ofstream file(_filepath);
@@ -216,8 +217,8 @@ bool write_sequence(
   return true;
 }
 
-template<typename Derived>
-bool read_eigen_matrix_from_csv(
+template <typename Derived>
+bool read_eigen_matrix_from_file(
     const std::string& _filepath,
     MatrixBase<Derived>* _matrix,
     const char _delimiter /*= ','*/) {
@@ -280,10 +281,11 @@ bool read_eigen_matrix_from_csv(
   return true;
 }
 
-template<typename Derived>
-bool write_eigen_matrix_to_csv(
+template <typename Derived>
+bool write_eigen_matrix_to_file(
     const std::string& _filepath,
-    const MatrixBase<Derived>& _matrix) {
+    const MatrixBase<Derived>& _matrix,
+    const char _delimiter /*= ','*/) {
   std::ofstream file(_filepath);
   if (!file.good()) {
     LOG(WARNING) << "Can't write the file: '" << _filepath << "'";
@@ -291,13 +293,13 @@ bool write_eigen_matrix_to_csv(
   }
 
   const IOFormat csv_format(
-      FullPrecision, DontAlignCols, ",");
+      FullPrecision, DontAlignCols, std::string(1, _delimiter));
   file << _matrix.format(csv_format);
   file.close();
   return true;
 }
 
-template<typename Derived>
+template <typename Derived>
 bool read_eigen_matrix_from_binary(
     const std::string& _filepath,
     const MatrixBase<Derived>* _matrix) {
@@ -320,7 +322,7 @@ bool read_eigen_matrix_from_binary(
   return true;
 }
 
-template<typename Derived>
+template <typename Derived>
 bool write_eigen_matrix_to_binary(
     const std::string& _filepath,
     const MatrixBase<Derived>& _matrix) {

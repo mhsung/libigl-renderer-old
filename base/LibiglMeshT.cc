@@ -56,7 +56,7 @@ bool LibiglMeshT::read_mesh(const std::string& _filename) {
 
 bool LibiglMeshT::read_face_labels(const std::string& _filename) {
   FL_ = VectorXi(n_faces());
-  if (!Utils::read_eigen_matrix_from_csv(_filename, &FL_)) {
+  if (!Utils::read_eigen_matrix_from_file(_filename, &FL_)) {
     return false;
   }
 
@@ -66,7 +66,7 @@ bool LibiglMeshT::read_face_labels(const std::string& _filename) {
 }
 
 bool LibiglMeshT::write_face_labels(const std::string& _filename) {
-  if (!Utils::write_eigen_matrix_to_csv(_filename, FL_)) {
+  if (!Utils::write_eigen_matrix_to_file(_filename, FL_)) {
     return false;
   }
   return true;
@@ -103,7 +103,7 @@ bool LibiglMeshT::write_bounding_box(const std::string& _filename) {
   const double bbox_diagonal = (bb_max_ - bb_min_).norm();
 	Eigen::VectorXd bb_info(4);
   bb_info << center_, bbox_diagonal;
-  if (!Utils::write_eigen_matrix_to_csv(_filename, bb_info.transpose())) {
+  if (!Utils::write_eigen_matrix_to_file(_filename, bb_info.transpose())) {
     return false;
   }
   return true;

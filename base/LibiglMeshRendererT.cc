@@ -23,7 +23,7 @@ LibiglMeshRendererT::LibiglMeshRendererT(const int _width, const int _height)
 
 bool LibiglMeshRendererT::read_projection(const std::string& _filename) {
   Matrix4f projection;
-  if (!Utils::read_eigen_matrix_from_csv(_filename, &projection)) {
+  if (!Utils::read_eigen_matrix_from_file(_filename, &projection)) {
     return false;
   }
   set_projection(projection);
@@ -32,7 +32,7 @@ bool LibiglMeshRendererT::read_projection(const std::string& _filename) {
 
 bool LibiglMeshRendererT::read_modelview(const std::string& _filename) {
   Matrix4f modelview;
-  if (!Utils::read_eigen_matrix_from_csv(_filename, &modelview)) {
+  if (!Utils::read_eigen_matrix_from_file(_filename, &modelview)) {
     return false;
   }
   set_modelview(modelview);
@@ -40,14 +40,14 @@ bool LibiglMeshRendererT::read_modelview(const std::string& _filename) {
 }
 
 bool LibiglMeshRendererT::write_projection(const std::string& _filename) const {
-  if (!Utils::write_eigen_matrix_to_csv(_filename, get_projection())) {
+  if (!Utils::write_eigen_matrix_to_file(_filename, get_projection())) {
     return false;
   }
   return true;
 }
 
 bool LibiglMeshRendererT::write_modelview(const std::string& _filename) const {
-  if (!Utils::write_eigen_matrix_to_csv(_filename, get_modelview())) {
+  if (!Utils::write_eigen_matrix_to_file(_filename, get_modelview())) {
     return false;
   }
   return true;

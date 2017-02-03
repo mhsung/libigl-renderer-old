@@ -15,8 +15,6 @@
 #include <Eigen/Core>
 #include <Eigen/Sparse>
 
-// History:
-//  changed templates from generic matrices to PlainObjectBase Alec May 7, 2011
 namespace igl
 {
   // Subdivide without moving vertices: Given the triangle mesh [V, F],
