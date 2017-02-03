@@ -35,12 +35,11 @@ IGL_INLINE void igl::PCA(
   assert(P.cols() == 3);
   using namespace Eigen;
 
-  const auto P_t = P.transpose();
-  const auto P_t_mean = P_t.rowwise().mean();
-  Matrix<Scalar, 3, 1> t_t(P_t_mean);
+  const Matrix<Scalar, ColumnP, RowP> P_t = P.transpose();
+  const Matrix<Scalar, 3, 1>  t_t(P_t.rowwise().mean());
 
-  const Matrix<Scalar, RowP, ColumnP> P_t_centered = P_t.colwise() - P_t_mean;
-  JacobiSVD<Matrix<Scalar, RowP, ColumnP>> svd(P_t_centered, ComputeFullU);
+  const Matrix<Scalar, ColumnP, RowP> P_t_centered = P_t.colwise() - t_t;
+  JacobiSVD<Matrix<Scalar, ColumnP, RowP>> svd(P_t_centered, ComputeFullU);
 
   // NOTE:
   // Singular values are always sorted in decreasing order.
