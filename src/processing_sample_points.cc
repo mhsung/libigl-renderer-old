@@ -46,12 +46,16 @@ void LibiglMesh::processing_sample_points(
 
   Affine3d T = Affine3d::Identity();
 	RowVector3d center = P.colwise().mean();
+  double bbox_diagonal = 0.0;
   if (_align_pca) {
     igl::PCA(P, T);
     P = (T * P.transpose()).transpose();
   }
 	else if (_center_origin) {
     P = P.rowwise() - center;
+    const auto bb_min = P.colwise().minCoeff();
+    const auto bb_max = P.colwise().maxCoeff();
+    bbox_diagonal = (bb_max - bb_min).norm();
   }
 
   if (_out_point_set_dir != "") {
@@ -80,6 +84,8 @@ void LibiglMesh::processing_sample_points(
     const filesystem::path center_file =
         filesystem::path(_out_center_dir) /
         filesystem::path(center_filename);
-    Utils::write_eigen_matrix_to_file(center_file.str(), center);
+    RowVector4d center_and_size;
+    center_and_size << center, bbox_diagonal;
+    Utils::write_eigen_matrix_to_file(center_file.str(), center_and_size);
   }
 }
