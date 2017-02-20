@@ -39,7 +39,7 @@ void random_label_rgb_color(
 
 // @_vec: Input vector.
 // @_query: Query value.
-// @return: Vecter indices with query value.
+// @return: Vector indices with query value.
 template <typename T>
 VectorXi find(const Matrix<T, Dynamic, 1>& _vec, const T _query);
 

@@ -52,9 +52,10 @@ class LibiglMesh : public LibiglMeshT {
     void processing_disassemble_to_components(
         const std::string& _out_component_mesh_dir,
         const std::string& _out_component_mesh_unnormalized_dir,
-        const std::string& _out_component_mesh_face_map_dir,
+        const std::string& _out_component_mesh_face_map_file,
         const int _min_num_components,
-        const int _min_component_bbox_diagonal);
+        const int _min_component_bbox_diagonal,
+        const bool _find_symmetry = false);
 
     void processing_sample_points(
         const int FLAGS_num_points,

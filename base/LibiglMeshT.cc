@@ -119,7 +119,9 @@ void LibiglMeshT::pre_processing() {
       return;
     }
   }
+}
 
+void LibiglMeshT::post_processing() {
   if (FLAGS_azimuth_deg != 0.0 || FLAGS_elevation_deg != 0.0 ||
       FLAGS_theta_deg != 0.0) {
     if (renderer_ == nullptr) {
@@ -152,9 +154,7 @@ void LibiglMeshT::pre_processing() {
 			return;
 		}
 	}
-}
 
-void LibiglMeshT::post_processing() {
 #ifdef USE_OSMESA
   renderer_->snapshot(FLAGS_snapshot);
 #else

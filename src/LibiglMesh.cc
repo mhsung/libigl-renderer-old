@@ -20,6 +20,13 @@
 #include <modules/remove_small_components.h>
 #include <utils/mrf_potts.h>
 
+
+// Mesh flipping.
+DEFINE_bool(centerize, false, "");
+DEFINE_bool(flip_x, false, "");
+DEFINE_bool(flip_y, false, "");
+DEFINE_bool(flip_z, false, "");
+
 // Define input variables.
 DEFINE_bool(run_face_labeling, false, "");
 DEFINE_bool(run_part_disassembly, false, "");
@@ -44,10 +51,13 @@ DEFINE_string(out_part_mesh_face_map_dir, "",
 DEFINE_string(out_component_mesh_dir, "", "output component mesh directory.");
 DEFINE_string(out_component_mesh_unnormalized_dir, "",
     "output unnormalized component mesh directory.");
-DEFINE_string(out_component_mesh_face_map_dir, "",
-    "directory of output component mesh face map to input mesh.");
+//DEFINE_string(out_component_mesh_face_map_dir, "",
+//    "directory of output component mesh face map to input mesh.");
+DEFINE_string(out_component_mesh_face_map_file, "",
+              "file of output component mesh face map to input mesh.");
 DEFINE_int32(min_num_components, 3, "");
 DEFINE_double(min_component_bbox_diagonal, 0.05, "");
+DEFINE_bool(find_symmetric_components, false, "");
 
 // Point sampling params.
 DEFINE_int32(num_points, 10000, "");
@@ -118,10 +128,32 @@ void LibiglMesh::transform_mesh(const std::string& _filename) {
 }
 
 void LibiglMesh::processing() {
+	bool mesh_modified = false;
+
+	// Centerize.
+	if (FLAGS_centerize) {
+		V_ = V_.rowwise() - center_.transpose();
+		mesh_modified = true;
+	}
+
+	// Mesh flipping.
+	if (FLAGS_flip_x) { V_.col(0) = -V_.col(0); mesh_modified = true; }
+	if (FLAGS_flip_y) { V_.col(1) = -V_.col(1); mesh_modified = true; }
+	if (FLAGS_flip_z) { V_.col(2) = -V_.col(2); mesh_modified = true; }
+
+	if (mesh_modified) {
+		update_bounding_box();
+    renderer_->set_mesh(V_, F_);
+    renderer_->set_scene_pos(center_.cast<float>(), (float)radius_);
+	}
+
   if (FLAGS_run_face_labeling) {
     processing_subdivide_mesh(FLAGS_out_mesh);
+
     processing_project_pts_labels_to_mesh(
-        FLAGS_point_set, FLAGS_point_labels, FLAGS_out_face_labels);
+        FLAGS_point_set,
+        FLAGS_point_labels,
+        FLAGS_out_face_labels);
   }
   else if (FLAGS_run_part_disassembly) {
     processing_disassemble_to_parts(
@@ -133,9 +165,10 @@ void LibiglMesh::processing() {
     processing_disassemble_to_components(
         FLAGS_out_component_mesh_dir,
         FLAGS_out_component_mesh_unnormalized_dir,
-        FLAGS_out_component_mesh_face_map_dir,
+        FLAGS_out_component_mesh_face_map_file,
         FLAGS_min_num_components,
-        FLAGS_min_component_bbox_diagonal);
+        FLAGS_min_component_bbox_diagonal,
+        FLAGS_find_symmetric_components);
   }
   else if (FLAGS_run_point_sampling) {
     processing_sample_points(

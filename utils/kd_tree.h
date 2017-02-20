@@ -116,8 +116,8 @@ void find_k_closest_points(
     std::vector<ScalarT> i_sqr_dists(K);
     nanoflann::KNNResultSet<ScalarT> results(K);
     results.init(&i_ret_idxs[0], &i_sqr_dists[0]);
-    CHECK(_tree.adaptor_.findNeighbors(
-        results, query_pt.data(), nanoflann::SearchParams(10)));
+    _tree.adaptor_.findNeighbors(
+        results, query_pt.data(), nanoflann::SearchParams(10));
 
     for (int j = 0; j < K; ++j) {
       (*_ret_idxs)(i, j) = i_ret_idxs[j];
