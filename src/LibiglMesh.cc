@@ -32,7 +32,8 @@ DEFINE_bool(run_face_labeling, false, "");
 DEFINE_bool(run_part_disassembly, false, "");
 DEFINE_bool(run_component_disassembly, false, "");
 DEFINE_bool(run_point_sampling, false, "");
-DEFINE_bool(run_color_barycenter, false, "");
+DEFINE_bool(run_barycenter_coloring, false, "");
+DEFINE_bool(run_contacting_point_labeling, false, "");
 
 // Face labeling params.
 DEFINE_string(point_set, "", "point set file.");
@@ -60,7 +61,7 @@ DEFINE_double(min_component_bbox_diagonal, 0.05, "");
 DEFINE_bool(find_symmetric_components, false, "");
 
 // Point sampling params.
-DEFINE_int32(num_points, 10000, "");
+DEFINE_int32(num_points, 1024, "");
 DEFINE_string(out_point_set_dir, "", "output point set directory.");
 DEFINE_bool(align_pca, false, "");
 DEFINE_string(out_pca_alignment_dir, "",
@@ -68,8 +69,12 @@ DEFINE_string(out_pca_alignment_dir, "",
 DEFINE_bool(center_origin, false, "");
 DEFINE_string(out_center_dir, "", "directory of center positions.");
 
-// Color mesh based on center coordinates.
+// Barycenter-based mesh coloring params.
 DEFINE_string(coloring_reference_mesh, "", "");
+
+// Contacting point labeling params.
+DEFINE_string(out_point_labels, "", "output point label file.");
+DEFINE_double(max_contacting_squared_distance, 0.05*0.05, "");
 
 // Transform mesh.
 DEFINE_string(transformation, "", "");
@@ -179,8 +184,14 @@ void LibiglMesh::processing() {
         FLAGS_align_pca,
         FLAGS_center_origin);
   }
-  else if (FLAGS_run_color_barycenter) {
+  else if (FLAGS_run_barycenter_coloring) {
     processing_color_barycenter(FLAGS_coloring_reference_mesh);
+  }
+  else if (FLAGS_run_contacting_point_labeling) {
+    processing_label_contacting_points(
+        FLAGS_point_set,
+        FLAGS_out_point_labels,
+        FLAGS_max_contacting_squared_distance);
   }
   else if (FLAGS_transformation != "") {
     transform_mesh(FLAGS_transformation);

@@ -67,6 +67,11 @@ class LibiglMesh : public LibiglMeshT {
 
     void processing_color_barycenter(
         const std::string& _coloring_reference_mesh_file);
+
+    void processing_label_contacting_points(
+        const std::string& _point_set_file,
+        const std::string& _out_point_labels_file,
+        const double _max_contacting_squared_distance);
 };
 
 #endif	// LIBIGL_MESH_H
