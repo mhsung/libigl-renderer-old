@@ -74,7 +74,7 @@ DEFINE_string(coloring_reference_mesh, "", "");
 
 // Contacting point labeling params.
 DEFINE_string(out_point_labels, "", "output point label file.");
-DEFINE_double(max_contacting_squared_distance, 0.05*0.05, "");
+DEFINE_double(max_contacting_squared_distance, 0.0001, "");
 
 // Transform mesh.
 DEFINE_string(transformation, "", "");

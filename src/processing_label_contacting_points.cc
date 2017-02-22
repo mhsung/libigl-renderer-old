@@ -48,7 +48,7 @@ void LibiglMesh::processing_label_contacting_points(
     CHECK_GT(label, 0);
 
     const VectorXi label_fids = Utils::find(FL_, label);
-    MatrixXi label_F_old = Utils::slice_rows(F_, label_fids);
+    const MatrixXi label_F_old = Utils::slice_rows(F_, label_fids);
     MatrixXd label_V;
     MatrixXi label_F;
     VectorXi IX;
@@ -59,13 +59,13 @@ void LibiglMesh::processing_label_contacting_points(
     MatrixXd C;
     igl::point_mesh_squared_distance(P, label_V, label_F, sqrD, I, C);
 
-    for (int i = 0; i < num_points; ++i) {
-      if (sqrD(i) <= _max_contacting_squared_distance) PL(i, label) = 1;
+    for (int j = 0; j < num_points; ++j) {
+      if (sqrD(j) <= _max_contacting_squared_distance) PL(j, label) = 1;
     }
   }
 
   LOG(INFO) << label_set.transpose();
-  LOG(INFO) <<  PL.colwise().sum();
+  LOG(INFO) << PL.colwise().sum();
 
   CHECK(Utils::write_eigen_matrix_to_file(_out_point_labels_file, PL));
 }
