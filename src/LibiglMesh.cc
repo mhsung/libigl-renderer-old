@@ -67,7 +67,7 @@ DEFINE_bool(align_pca, false, "");
 DEFINE_string(out_pca_alignment_dir, "",
     "directory of PCA alignment transformation matrix.");
 DEFINE_bool(center_origin, false, "");
-DEFINE_string(out_center_dir, "", "directory of center positions.");
+DEFINE_string(out_position_dir, "", "directory of center positions.");
 
 // Barycenter-based mesh coloring params.
 DEFINE_string(coloring_reference_mesh, "", "");
@@ -180,7 +180,7 @@ void LibiglMesh::processing() {
         FLAGS_num_points,
         FLAGS_out_point_set_dir,
         FLAGS_out_pca_alignment_dir,
-        FLAGS_out_center_dir,
+        FLAGS_out_position_dir,
         FLAGS_align_pca,
         FLAGS_center_origin);
   }

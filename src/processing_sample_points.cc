@@ -32,7 +32,7 @@ void LibiglMesh::processing_sample_points(
     const int _num_points,
     const std::string& _out_point_set_dir,
     const std::string& _out_pca_alignment_dir,
-    const std::string& _out_center_dir,
+    const std::string& _out_position_dir,
     const bool _align_pca,
     const bool _center_origin) {
   // Sample points on mesh.
@@ -77,12 +77,12 @@ void LibiglMesh::processing_sample_points(
         filesystem::path(transformation_filename);
     Utils::write_eigen_matrix_to_file(transformation_file.str(), T.matrix());
   }
-	else if (_center_origin && _out_center_dir != "") {
+	else if (_center_origin && _out_position_dir != "") {
     const std::string kMatrixExt = ".csv";
     const std::string center_filename =
         filesystem::path(mesh_name_).basename() + kMatrixExt;
     const filesystem::path center_file =
-        filesystem::path(_out_center_dir) /
+        filesystem::path(_out_position_dir) /
         filesystem::path(center_filename);
     RowVector4d center_and_size;
     center_and_size << center, bbox_diagonal;
