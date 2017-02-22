@@ -63,11 +63,13 @@ DEFINE_bool(find_symmetric_components, false, "");
 // Point sampling params.
 DEFINE_int32(num_points, 1024, "");
 DEFINE_string(out_point_set_dir, "", "output point set directory.");
-DEFINE_bool(align_pca, false, "");
+DEFINE_string(out_position_dir, "", "directory of center positions.");
 DEFINE_string(out_pca_alignment_dir, "",
     "directory of PCA alignment transformation matrix.");
-DEFINE_bool(center_origin, false, "");
-DEFINE_string(out_position_dir, "", "directory of center positions.");
+DEFINE_string(out_centered_point_set_dir, "",
+    "output centered point set directory.");
+DEFINE_string(out_pca_aligned_point_set_dir, "",
+    "output PCA-aligned point set directory.");
 
 // Barycenter-based mesh coloring params.
 DEFINE_string(coloring_reference_mesh, "", "");
@@ -181,8 +183,8 @@ void LibiglMesh::processing() {
         FLAGS_out_point_set_dir,
         FLAGS_out_pca_alignment_dir,
         FLAGS_out_position_dir,
-        FLAGS_align_pca,
-        FLAGS_center_origin);
+        FLAGS_out_centered_point_set_dir,
+        FLAGS_out_pca_aligned_point_set_dir);
   }
   else if (FLAGS_run_barycenter_coloring) {
     processing_color_barycenter(FLAGS_coloring_reference_mesh);

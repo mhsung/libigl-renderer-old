@@ -60,10 +60,10 @@ class LibiglMesh : public LibiglMeshT {
     void processing_sample_points(
         const int FLAGS_num_points,
         const std::string& _out_point_set_dir,
-        const std::string& _out_pca_alignment_dir,
+        const std::string& _out_pca_transformation_dir,
         const std::string& _out_position_dir,
-        const bool _align_pca,
-        const bool _center_origin);
+        const std::string& _out_centered_point_set_dir,
+        const std::string& _out_pca_aligned_point_set_dir);
 
     void processing_color_barycenter(
         const std::string& _coloring_reference_mesh_file);
