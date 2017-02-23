@@ -15,6 +15,8 @@
 // Define input variables.
 DEFINE_string(mesh, "", "mesh file.");
 DEFINE_string(face_labels, "", "face label file.");
+DEFINE_string(point_set, "", "point set file.");
+DEFINE_string(point_labels, "", "point label file.");
 DEFINE_double(azimuth_deg, 0.0, "azimuth (degree). "
     "ignored if 'modelview_matrix' is set");
 DEFINE_double(elevation_deg, 0.0, "elevation (degree). "
@@ -65,6 +67,30 @@ bool LibiglMeshT::read_face_labels(const std::string& _filename) {
   return true;
 }
 
+bool LibiglMeshT::read_point_set(const std::string& _filename) {
+  if (!Utils::read_eigen_matrix_from_file(_filename, &P_, ' ')) {
+    return false;
+  }
+
+  if (renderer_ == nullptr) {
+    LOG(WARNING) << "Renderer is not set";
+  } else {
+    renderer_->set_points(P_);
+  }
+
+  return true;
+}
+
+bool LibiglMeshT::read_point_labels(const std::string& _filename) {
+  if (!Utils::read_eigen_matrix_from_file(_filename, &PL_)) {
+    return false;
+  }
+
+  // Set point colors.
+  set_point_label_colors();
+  return true;
+}
+
 bool LibiglMeshT::write_face_labels(const std::string& _filename) {
   if (!Utils::write_eigen_matrix_to_file(_filename, FL_)) {
     return false;
@@ -89,6 +115,26 @@ void LibiglMeshT::set_face_label_colors() {
     LOG(WARNING) << "Renderer is not set";
   } else {
     renderer_->set_face_colors(FC_);
+  }
+}
+
+void LibiglMeshT::set_point_label_colors() {
+  if (PL_.rows() != P_.rows()) {
+    LOG(WARNING) << "Number of point labels does not match number of points.";
+    return;
+  }
+
+  PC_ = MatrixXf(n_points(), 3);
+  for (int pid = 0; pid < n_points(); ++pid) {
+    Vector3f color;
+    Utils::random_label_rgb_color(PL_(pid), &color);
+    PC_.row(pid) = color.transpose();
+  }
+
+  if (renderer_ == nullptr) {
+    LOG(WARNING) << "Renderer is not set";
+  } else {
+    renderer_->set_point_colors(PC_);
   }
 }
 

@@ -18,10 +18,6 @@ class LibiglMesh : public LibiglMeshT {
     LibiglMesh() : LibiglMeshT() {};
     LibiglMesh(LibiglMeshRendererT* _renderer) : LibiglMeshT(_renderer) {};
 
-    bool read_point_set(const std::string& _filename, MatrixXd* _P);
-
-    bool read_point_labels(const std::string& _filename, VectorXi* _PL);
-
     void remove_duplicates();
 
     void upsample_mesh(
@@ -58,7 +54,7 @@ class LibiglMesh : public LibiglMeshT {
         const bool _find_symmetry = false);
 
     void processing_sample_points(
-        const int FLAGS_num_points,
+        const int _num_sample_points,
         const std::string& _out_point_set_dir,
         const std::string& _out_pca_transformation_dir,
         const std::string& _out_position_dir,

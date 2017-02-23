@@ -35,6 +35,10 @@ class OSMesaMeshRenderer : public LibiglMeshRendererT {
     virtual void set_mesh(
         const Eigen::MatrixXd& _V, const Eigen::MatrixXi& _F);
     virtual void set_face_colors(const Eigen::MatrixXf& _FC);
+
+    virtual void set_points(const Eigen::MatrixXd& _P);
+    virtual void set_point_colors(const Eigen::MatrixXf& _PC);
+
     virtual void run_loop();
     virtual bool snapshot(const std::string& _filename);
 
@@ -44,16 +48,23 @@ class OSMesaMeshRenderer : public LibiglMeshRendererT {
     static void set_default_material();
     static void set_default_light();
     void render();
+    void render_mesh();
+    void render_point_set();
 
   private:
     OSMesaContext context_;
     void *frame_buffer_;
 
+    // Mesh.
     Matrix<double, Dynamic, 3, RowMajor> V_;
     Matrix<int, Dynamic, 3, RowMajor> F_;
     Matrix<double, Dynamic, 3, RowMajor> VN_;
     Matrix<double, Dynamic, 3, RowMajor> FN_;
     Matrix<float, Dynamic, 3, RowMajor> FC_;
+
+    // Point set.
+    Matrix<double, Dynamic, 3, RowMajor> P_;
+    Matrix<float, Dynamic, 3, RowMajor> PC_;
 
     Matrix4f projection_;
     Matrix4f modelview_;

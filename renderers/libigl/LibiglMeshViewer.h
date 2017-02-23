@@ -28,10 +28,13 @@ class LibiglMeshViewer : public LibiglMeshRendererT {
     virtual void set_projection(const Matrix4f& _projection);
     virtual void set_modelview(const Matrix4f& _modelview);
 
-
     virtual void set_mesh(
         const Eigen::MatrixXd& _V, const Eigen::MatrixXi& _F);
     virtual void set_face_colors(const Eigen::MatrixXf& _FC);
+
+    virtual void set_points(const Eigen::MatrixXd& _P);
+    virtual void set_point_colors(const Eigen::MatrixXf& _PC);
+
     virtual void run_loop();
     virtual bool snapshot(const std::string& _filename);
 

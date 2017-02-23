@@ -48,7 +48,6 @@ void OSMesaMeshRenderer::set_modelview(const Matrix4f& _modelview) {
 void OSMesaMeshRenderer::set_mesh(
     const Eigen::MatrixXd& _V, const Eigen::MatrixXi& _F) {
   CHECK_EQ(_V.cols(), 3);
-  CHECK_EQ(_V.cols(), 3);
   V_.resize(_V.rows(), 3);
   for (int i = 0 ; i < _V.rows(); ++i) V_.row(i) = _V.row(i);
   F_.resize(_F.rows(), 3);
@@ -62,6 +61,18 @@ void OSMesaMeshRenderer::set_face_colors(const Eigen::MatrixXf& _FC) {
   CHECK_EQ(_FC.cols(), 3);
   FC_.resize(_FC.rows(), 3);
   for (int i = 0 ; i < _FC.rows(); ++i) FC_.row(i) = _FC.row(i);
+}
+
+void OSMesaMeshRenderer::set_points(const Eigen::MatrixXd& _P) {
+  CHECK_EQ(_P.cols(), 3);
+  P_.resize(_P.rows(), 3);
+  for (int i = 0 ; i < _P.rows(); ++i) P_.row(i) = _P.row(i);
+}
+
+void OSMesaMeshRenderer::set_point_colors(const Eigen::MatrixXf& _PC) {
+  CHECK_EQ(_PC.cols(), 3);
+  FC_.resize(_PC.rows(), 3);
+  for (int i = 0 ; i < _PC.rows(); ++i) PC_.row(i) = _PC.row(i);
 }
 
 void OSMesaMeshRenderer::run_loop() {
@@ -175,8 +186,6 @@ void OSMesaMeshRenderer::set_default_light() {
 }
 
 void OSMesaMeshRenderer::render() {
-  const bool has_face_color = (FC_.rows() == F_.rows());
-
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glMatrixMode(GL_PROJECTION);
   glLoadMatrixf(projection_.data());
@@ -188,6 +197,15 @@ void OSMesaMeshRenderer::render() {
   // glEnable(GL_LIGHTING);
   // glShadeModel(GL_SMOOTH);
   glDisable(GL_LIGHTING);
+
+  render_point_set();
+  render_mesh();
+
+  set_default_material();
+}
+
+void OSMesaMeshRenderer::render_mesh() {
+  const bool has_face_color = (FC_.rows() == F_.rows());
 
   glEnableClientState(GL_VERTEX_ARRAY);
   glVertexPointer(3, GL_DOUBLE, 0, V_.data());
@@ -218,5 +236,24 @@ void OSMesaMeshRenderer::render() {
 
   glDisableClientState(GL_VERTEX_ARRAY);
   glDisableClientState(GL_NORMAL_ARRAY);
-  set_default_material();
+}
+
+void OSMesaMeshRenderer::render_point_set() {
+  const bool has_point_color = (PC_.rows() == P_.rows());
+
+  glEnableClientState(GL_VERTEX_ARRAY);
+  glVertexPointer(3, GL_DOUBLE, 0, P_.data());
+
+  glBegin(GL_POINTS);
+  for (int pid = 0; pid < F_.rows(); ++pid) {
+    if (has_face_color) {
+      const Vector3f color = PC_.row(pid);
+      glColor3fv(color.data());
+    } else {
+      glColor4fv(igl::MAYA_GREY.data());
+    }
+  }
+  glEnd();
+
+  glDisableClientState(GL_VERTEX_ARRAY);
 }

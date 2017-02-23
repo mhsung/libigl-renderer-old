@@ -39,6 +39,10 @@ class LibiglMeshRendererT {
     virtual void set_mesh(
         const Eigen::MatrixXd& _V, const Eigen::MatrixXi& _F) = 0;
     virtual void set_face_colors(const Eigen::MatrixXf& _FC) = 0;
+
+    virtual void set_points(const Eigen::MatrixXd& _P) = 0;
+    virtual void set_point_colors(const Eigen::MatrixXf& _PC) = 0;
+
     virtual void run_loop() = 0;
     virtual bool snapshot(const std::string& _filename) = 0;
 

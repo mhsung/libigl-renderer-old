@@ -14,17 +14,9 @@
 #include <igl/facet_components.h>
 #include <igl/random_points_on_mesh.h>
 #include <igl/read_triangle_mesh.h>
-#include <igl/remove_unreferenced.h>
-#include <igl/per_face_normals.h>
 #include <igl/point_mesh_squared_distance.h>
-#include <igl/write_triangle_mesh.h>
 #include <modules/consistent_face_flippping.h>
-#include <modules/edge_lengths_simple.h>
-#include <modules/PCA.h>
-#include <modules/remove_duplicates_custom.h>
 #include <modules/remove_small_components.h>
-#include <modules/symmetric_elements.h>
-#include <modules/upsample_non_manifold.h>
 #include <utils/mrf_potts.h>
 
 
@@ -33,18 +25,21 @@ void LibiglMesh::processing_label_contacting_points(
     const std::string& _out_point_labels_file,
     const double _max_contacting_squared_distance) {
   // Read point set and labels.
-  MatrixXd P;
-  if (!read_point_set(_point_set_file, &P)) return;
-  const int num_points = P.rows();
+  if (!read_point_set(_point_set_file)) return;
+  const int num_points = P_.rows();
 
   const VectorXi label_set = Utils::unique(FL_);
-  MatrixXi PL = MatrixXi::Zero(num_points, label_set.maxCoeff() + 1);
+  MatrixXi P_contacted = MatrixXi::Zero(num_points, label_set.maxCoeff());
+
+  PL_ = VectorXi::Zero(num_points);
+  VectorXd min_sqrD = VectorXd::Constant(
+      num_points, std::numeric_limits<double>::max());
 
   // Process for each label mesh.
   for (int i = 0; i < label_set.size(); ++i) {
     const int label = label_set[i];
     // NOTE:
-    // Assume that there is no zero label.
+    // Assume that labels start from 1.
     CHECK_GT(label, 0);
 
     const VectorXi label_fids = Utils::find(FL_, label);
@@ -57,15 +52,23 @@ void LibiglMesh::processing_label_contacting_points(
     VectorXd sqrD;
     VectorXi I;
     MatrixXd C;
-    igl::point_mesh_squared_distance(P, label_V, label_F, sqrD, I, C);
+    igl::point_mesh_squared_distance(P_, label_V, label_F, sqrD, I, C);
 
+    // NOTE:
+    // Assume that labels start from 1.
     for (int j = 0; j < num_points; ++j) {
-      if (sqrD(j) <= _max_contacting_squared_distance) PL(j, label) = 1;
+      if (sqrD(j) <= _max_contacting_squared_distance) {
+        P_contacted(j, label - 1) = 1;
+
+        if (sqrD(j) < min_sqrD(j)) {
+          PL_(j) = label;
+          min_sqrD(j) = sqrD(j);
+        }
+      }
     }
   }
 
-  LOG(INFO) << label_set.transpose();
-  LOG(INFO) << PL.colwise().sum();
+  set_point_label_colors();
 
-  CHECK(Utils::write_eigen_matrix_to_file(_out_point_labels_file, PL));
+  CHECK(Utils::write_eigen_matrix_to_file(_out_point_labels_file, P_contacted));
 }

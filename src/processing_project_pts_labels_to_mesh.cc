@@ -33,13 +33,11 @@ void LibiglMesh::processing_project_pts_labels_to_mesh(
     const std::string& _point_labels_file,
     const std::string& _out_face_labels_file) {
   // Read point set and labels.
-  MatrixXd P;
-  if (!read_point_set(_point_set_file, &P)) return;
-  const int num_points = P.rows();
+  if (!read_point_set(_point_set_file)) return;
+  const int num_points = P_.rows();
 
-  VectorXi PL;
-  if (!read_point_labels(_point_labels_file, &PL)) return;
-  const VectorXi label_set = Utils::unique(PL);
+  if (!read_point_labels(_point_labels_file)) return;
+  const VectorXi label_set = Utils::unique(PL_);
   const int num_labels = label_set.size();
 
   // Construct a map from labels to label indices.
@@ -59,11 +57,11 @@ void LibiglMesh::processing_project_pts_labels_to_mesh(
   CHECK_GT(num_samples, 0);
 
   // Assign labels based on closest points.
-  const KdTree::KdTreeXd P_tree(P);
+  const KdTree::KdTreeXd P_tree(P_);
   VectorXi S_to_P_idxs;
   VectorXd S_to_P_sqr_dists;
   KdTree::find_k_closest_points(P_tree, S, &S_to_P_idxs, &S_to_P_sqr_dists);
-  const VectorXi SL = Utils::slice_rows(PL, S_to_P_idxs);
+  const VectorXi SL = Utils::slice_rows(PL_, S_to_P_idxs);
 
   // Compute CRF unary terms.
   MatrixXi F_to_S_counts = MatrixXi::Zero(n_faces(), num_labels);

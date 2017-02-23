@@ -29,7 +29,7 @@
 
 
 void LibiglMesh::processing_sample_points(
-    const int _num_points,
+    const int _num_sample_points,
     const std::string& _out_point_set_dir,
     const std::string& _out_pca_transformation_dir,
     const std::string& _out_position_dir,
@@ -38,7 +38,7 @@ void LibiglMesh::processing_sample_points(
   // Sample points on mesh.
   SparseMatrix<double> B;
   VectorXi FI;
-  igl::random_points_on_mesh(_num_points, V_, F_, B, FI);
+  igl::random_points_on_mesh(_num_sample_points, V_, F_, B, FI);
   const Matrix<double, Dynamic, 3> P = B * V_;
   const int num_samples = P.rows();
   LOG(INFO) << "# samples: " << num_samples;

@@ -8,6 +8,7 @@
 #include "LibiglMeshViewer.h"
 
 #include <igl/png/writePNG.h>
+#include <utils/google_tools.h>
 
 
 LibiglMeshViewer::LibiglMeshViewer(const int _width, const int _height)
@@ -42,6 +43,20 @@ void LibiglMeshViewer::set_mesh(
 
 void LibiglMeshViewer::set_face_colors(const Eigen::MatrixXf& _FC) {
   viewer_.data.set_colors(_FC.cast<double>());
+}
+
+void LibiglMeshViewer::set_points(const Eigen::MatrixXd& _P) {
+  viewer_.data.points.resize(_P.rows(), 6);
+  viewer_.data.points.leftCols(3) = _P;
+
+  RowVector3d color;
+  color << igl::MAYA_GREY(0), igl::MAYA_GREY(1), igl::MAYA_GREY(2);
+  viewer_.data.points.rightCols(3).rowwise() = color;
+}
+
+void LibiglMeshViewer::set_point_colors(const Eigen::MatrixXf& _PC) {
+  CHECK_EQ(_PC.rows(), viewer_.data.points.rows());
+  viewer_.data.points.rightCols(3) = _PC.cast<double>();
 }
 
 void LibiglMeshViewer::run_loop() {

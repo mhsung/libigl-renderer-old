@@ -36,8 +36,6 @@ DEFINE_bool(run_barycenter_coloring, false, "");
 DEFINE_bool(run_contacting_point_labeling, false, "");
 
 // Face labeling params.
-DEFINE_string(point_set, "", "point set file.");
-DEFINE_string(point_labels, "", "point label file.");
 DEFINE_string(out_mesh, "", "output mesh file.");
 DEFINE_string(out_face_labels, "", "output face label file.");
 
@@ -61,7 +59,7 @@ DEFINE_double(min_component_bbox_diagonal, 0.05, "");
 DEFINE_bool(find_symmetric_components, false, "");
 
 // Point sampling params.
-DEFINE_int32(num_points, 1024, "");
+DEFINE_int32(num_sample_points, 1024, "");
 DEFINE_string(out_point_set_dir, "", "output point set directory.");
 DEFINE_string(out_position_dir, "", "directory of center positions.");
 DEFINE_string(out_pca_alignment_dir, "",
@@ -76,30 +74,11 @@ DEFINE_string(coloring_reference_mesh, "", "");
 
 // Contacting point labeling params.
 DEFINE_string(out_point_labels, "", "output point label file.");
-DEFINE_double(max_contacting_squared_distance, 0.0001, "");
+DEFINE_double(max_contacting_squared_distance, 0.005 * 0.005, "");
 
 // Transform mesh.
 DEFINE_string(transformation, "", "");
 
-
-bool LibiglMesh::read_point_set(const std::string& _filename, MatrixXd* _P) {
-  CHECK_NOTNULL(_P);
-
-  if (!Utils::read_eigen_matrix_from_file(_filename, _P, ' ')) {
-    return false;
-  }
-  return true;
-}
-
-bool LibiglMesh::read_point_labels(
-    const std::string& _filename, VectorXi* _PL) {
-  CHECK_NOTNULL(_PL);
-
-  if (!Utils::read_eigen_matrix_from_file(_filename, _PL)) {
-    return false;
-  }
-  return true;
-}
 
 void LibiglMesh::normalize_mesh(MatrixXd& _V) {
   const auto bb_min = _V.colwise().minCoeff();
@@ -179,7 +158,7 @@ void LibiglMesh::processing() {
   }
   else if (FLAGS_run_point_sampling) {
     processing_sample_points(
-        FLAGS_num_points,
+        FLAGS_num_sample_points,
         FLAGS_out_point_set_dir,
         FLAGS_out_pca_alignment_dir,
         FLAGS_out_position_dir,

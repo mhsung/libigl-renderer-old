@@ -18,6 +18,8 @@ using namespace Eigen;
 // Declare input variables.
 DECLARE_string(mesh);
 DECLARE_string(face_labels);
+DECLARE_string(point_set);
+DECLARE_string(point_labels);
 DECLARE_double(azimuth_deg);
 DECLARE_double(elevation_deg);
 DECLARE_double(theta_deg);
@@ -35,12 +37,17 @@ class LibiglMeshT {
 
     int n_vertices() const { return V_.rows(); }
     int n_faces() const { return F_.rows(); }
+    int n_points() const { return P_.rows(); }
 
     bool read_mesh(const std::string& _filename);
+    bool read_point_set(const std::string& _filename);
 
     bool read_face_labels(const std::string& _filename);
     bool write_face_labels(const std::string& _filename);
     void set_face_label_colors();
+
+    bool read_point_labels(const std::string& _filename);
+    void set_point_label_colors();
 
     void update_bounding_box();
     bool write_bounding_box(const std::string& _filename);
@@ -57,6 +64,7 @@ class LibiglMeshT {
     // Mesh properties.
     std::string mesh_name_;   // Includes extension.
 
+    // Mesh.
     MatrixXd V_;
     MatrixXi F_;
     MatrixXf VC_;
@@ -65,6 +73,11 @@ class LibiglMeshT {
     VectorXi FL_;
     MatrixXd VN_;
     MatrixXd FN_;
+
+    // Point set.
+    MatrixXd P_;
+    VectorXi PL_;
+    MatrixXf PC_;
 
     Vector3d bb_min_;
     Vector3d bb_max_;
