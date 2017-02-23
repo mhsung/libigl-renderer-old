@@ -246,7 +246,7 @@ void OSMesaMeshRenderer::render_point_set() {
 
   glBegin(GL_POINTS);
   for (int pid = 0; pid < F_.rows(); ++pid) {
-    if (has_face_color) {
+    if (has_point_color) {
       const Vector3f color = PC_.row(pid);
       glColor3fv(color.data());
     } else {
