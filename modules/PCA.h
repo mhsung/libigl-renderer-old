@@ -62,15 +62,15 @@ IGL_INLINE void igl::PCA(
       (T * P_temp.transpose()).transpose();
 
   const int num_points = P.rows();
-  Vector3i count_minus_coord = Vector3i::Zero();
+  Vector3i count_minus_coords = Vector3i::Zero();
   for (int i = 0; i < num_points; ++i) {
     for (int j = 0; j < 3; ++j) {
-      if (P_aligned(i, j) < 0) ++count_minus_coord[j];
+      if (P_aligned(i, j) < 0) ++count_minus_coords[j];
     }
   }
 
-  const bool x_flipped = count_minus_coord[0] > (0.5 + 0.01) * num_points;
-  const bool y_flipped = count_minus_coord[1] > (0.5 + 0.01) * num_points;
+  const bool x_flipped = count_minus_coords[0] > (0.5 + 0.01) * num_points;
+  const bool y_flipped = count_minus_coords[1] > (0.5 + 0.01) * num_points;
 
   Matrix3d R_f = Matrix3d::Identity();
   if (!x_flipped && y_flipped) {

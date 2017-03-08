@@ -7,7 +7,7 @@
 
 #include "LibiglMesh.h"
 
-#include <Eigen/geometry>
+#include <Eigen/Geometry>
 #include <igl/random_points_on_mesh.h>
 #include <modules/PCA.h>
 #include <utils/utils.h>
