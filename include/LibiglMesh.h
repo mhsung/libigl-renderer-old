@@ -32,8 +32,7 @@ class LibiglMesh : public LibiglMeshT {
   protected:
     virtual void processing();
 
-    void processing_subdivide_mesh(
-        const std::string& _out_mesh_file);
+    void processing_subdivide_mesh();
 
     void processing_project_pts_labels_to_mesh(
         const std::string& _point_set_file,

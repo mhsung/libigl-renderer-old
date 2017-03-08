@@ -34,6 +34,9 @@ namespace Utils {
 void random_label_rgb_color(
     const int _label, Vector3f* _color);
 
+std::vector<std::string> split_string(
+    const std::string& _str, const char delim = ',');
+
 
 // -- Eigen matrix utils -- //
 

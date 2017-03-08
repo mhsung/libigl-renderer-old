@@ -36,7 +36,6 @@ DEFINE_bool(run_barycenter_coloring, false, "");
 DEFINE_bool(run_contacting_point_labeling, false, "");
 
 // Face labeling params.
-DEFINE_string(out_mesh, "", "output mesh file.");
 DEFINE_string(out_face_labels, "", "output face label file.");
 
 // Part disassembly params.
@@ -78,6 +77,9 @@ DEFINE_double(max_contacting_squared_distance, 0.005 * 0.005, "");
 
 // Transform mesh.
 DEFINE_string(transformation, "", "");
+
+// Translate mesh.
+DEFINE_string(translation, "", "");
 
 
 void LibiglMesh::normalize_mesh(MatrixXd& _V) {
@@ -127,6 +129,19 @@ void LibiglMesh::processing() {
 	if (FLAGS_flip_y) { V_.col(1) = -V_.col(1); mesh_modified = true; }
 	if (FLAGS_flip_z) { V_.col(2) = -V_.col(2); mesh_modified = true; }
 
+  if (FLAGS_transformation != "") {
+    transform_mesh(FLAGS_transformation);
+    mesh_modified = true;
+  }
+
+  if (FLAGS_translation != "") {
+    std::vector<std::string> strs = Utils::split_string(FLAGS_translation);
+    RowVector3d t;
+    t << std::stod(strs[0]), std::stod(strs[1]), std::stod(strs[2]);
+		V_ = V_.rowwise() + t;
+    mesh_modified = true;
+  }
+
 	if (mesh_modified) {
 		update_bounding_box();
     renderer_->set_mesh(V_, F_);
@@ -134,8 +149,7 @@ void LibiglMesh::processing() {
 	}
 
   if (FLAGS_run_face_labeling) {
-    processing_subdivide_mesh(FLAGS_out_mesh);
-
+    processing_subdivide_mesh();
     processing_project_pts_labels_to_mesh(
         FLAGS_point_set,
         FLAGS_point_labels,
@@ -173,8 +187,5 @@ void LibiglMesh::processing() {
         FLAGS_point_set,
         FLAGS_out_point_labels,
         FLAGS_max_contacting_squared_distance);
-  }
-  else if (FLAGS_transformation != "") {
-    transform_mesh(FLAGS_transformation);
   }
 }

@@ -8,6 +8,7 @@
 #include "LibiglMeshT.h"
 
 #include <igl/read_triangle_mesh.h>
+#include <igl/write_triangle_mesh.h>
 #include <utils/filesystem/path.h>
 #include <utils/google_tools.h>
 #include <utils/utils.h>
@@ -27,6 +28,7 @@ DEFINE_string(projection_matrix, "", "projection matrix file.");
 DEFINE_string(modelview_matrix, "", "modelview matrix file.");
 DEFINE_string(bbox, "", "bounding box file.");
 DEFINE_string(snapshot, "", "snapshot file.");
+DEFINE_string(out_mesh, "", "output mesh file.");
 
 
 LibiglMeshT::LibiglMeshT()
@@ -200,6 +202,10 @@ void LibiglMeshT::post_processing() {
 			return;
 		}
 	}
+
+  if (FLAGS_out_mesh != "") {
+    igl::write_triangle_mesh(FLAGS_out_mesh, V_, F_);
+  }
 
 #ifdef USE_OSMESA
   renderer_->snapshot(FLAGS_snapshot);

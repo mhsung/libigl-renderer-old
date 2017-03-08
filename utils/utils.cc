@@ -96,4 +96,15 @@ void random_label_rgb_color(
   (*_color) << r, g, b;
 }
 
+std::vector<std::string> split_string(
+    const std::string& _str, const char delim) {
+  std::stringstream sstr(_str);
+  std::vector<std::string> tokens;
+  std::string token;
+  while (std::getline(sstr, token, delim)) {
+    tokens.push_back(token);
+  }
+  return tokens;
+}
+
 }

@@ -16,7 +16,6 @@
 #include <igl/read_triangle_mesh.h>
 #include <igl/remove_unreferenced.h>
 #include <igl/per_face_normals.h>
-#include <igl/write_triangle_mesh.h>
 #include <modules/consistent_face_flippping.h>
 #include <modules/edge_lengths_simple.h>
 #include <modules/PCA.h>
@@ -89,8 +88,7 @@ void LibiglMesh::upsample_mesh(
 }
 
 // Last modified: 01-09-2017
-void LibiglMesh::processing_subdivide_mesh(
-    const std::string& _out_mesh_file) {
+void LibiglMesh::processing_subdivide_mesh() {
   // Clean mesh.
   remove_duplicates();
 
@@ -98,9 +96,4 @@ void LibiglMesh::processing_subdivide_mesh(
   const double kEdgeLengthTol = 0.02;
   const int kMaxLoopIters = 10;
   upsample_mesh(kEdgeLengthTol, kMaxLoopIters);
-
-  // Save mesh.
-  if (_out_mesh_file != "") {
-    igl::write_triangle_mesh(_out_mesh_file, V_, F_);
-  }
 }
