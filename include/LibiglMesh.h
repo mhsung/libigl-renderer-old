@@ -18,6 +18,15 @@ class LibiglMesh : public LibiglMeshT {
     LibiglMesh() : LibiglMeshT() {};
     LibiglMesh(LibiglMeshRendererT* _renderer) : LibiglMeshT(_renderer) {};
 
+
+  protected:
+    virtual void processing();
+
+
+  // -- Simple mesh processing -- //
+  protected:
+    void mesh_processing();
+
     void remove_duplicates();
 
     void upsample_mesh(
@@ -29,9 +38,19 @@ class LibiglMesh : public LibiglMeshT {
     void normalize_mesh(MatrixXd& V);
 
 
+  // -- Simple point set processing -- //
   protected:
-    virtual void processing();
+    void point_set_processing();
 
+    void sample_points_on_mesh(const int num_points);
+
+    void centerize_points(const std::string& _out_file = "");
+
+    void pca_align_points(const std::string& _out_file = "");
+
+
+  // -- Additional processing -- //
+  protected:
     void processing_subdivide_mesh();
 
     void processing_project_pts_labels_to_mesh(
@@ -52,9 +71,7 @@ class LibiglMesh : public LibiglMeshT {
         const int _min_component_bbox_diagonal,
         const bool _find_symmetry = false);
 
-    void processing_sample_points(
-        const int _num_sample_points,
-        const std::string& _out_point_set_dir,
+    void processing_transform_points(
         const std::string& _out_pca_transformation_dir,
         const std::string& _out_position_dir,
         const std::string& _out_centered_point_set_dir,

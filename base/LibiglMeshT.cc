@@ -29,6 +29,7 @@ DEFINE_string(modelview_matrix, "", "modelview matrix file.");
 DEFINE_string(bbox, "", "bounding box file.");
 DEFINE_string(snapshot, "", "snapshot file.");
 DEFINE_string(out_mesh, "", "output mesh file.");
+DEFINE_string(out_point_set, "", "output point set file.");
 
 
 LibiglMeshT::LibiglMeshT()
@@ -205,6 +206,10 @@ void LibiglMeshT::post_processing() {
 
   if (FLAGS_out_mesh != "") {
     igl::write_triangle_mesh(FLAGS_out_mesh, V_, F_);
+  }
+
+  if (FLAGS_out_point_set != "") {
+    Utils::write_eigen_matrix_to_file(FLAGS_out_point_set, P_, ' ');
   }
 
 #ifdef USE_OSMESA

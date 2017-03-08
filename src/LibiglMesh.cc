@@ -6,32 +6,31 @@
 //
 
 #include "LibiglMesh.h"
-
-#include <list>
-#include <unordered_map>
-#include <igl/barycenter.h>
-#include <igl/doublearea.h>
-#include <igl/facet_components.h>
-#include <igl/random_points_on_mesh.h>
-#include <igl/read_triangle_mesh.h>
-#include <igl/remove_unreferenced.h>
-#include <igl/write_triangle_mesh.h>
-#include <modules/consistent_face_flippping.h>
-#include <modules/remove_small_components.h>
-#include <utils/mrf_potts.h>
+#include <utils/utils.h>
 
 
-// Mesh flipping.
+// Mesh processing.
 DEFINE_bool(centerize, false, "");
 DEFINE_bool(flip_x, false, "");
 DEFINE_bool(flip_y, false, "");
 DEFINE_bool(flip_z, false, "");
+DEFINE_string(translation, "", "");
+DEFINE_string(transformation, "", "");
 
-// Define input variables.
+// Point set processing.
+DEFINE_bool(sample_points, false, "");
+DEFINE_int32(num_sample_points, 1024, "");
+DEFINE_bool(centerize_point_set, false, "");
+DEFINE_string(out_point_set_center, "", "");
+DEFINE_bool(pca_align_point_set, false, "");
+DEFINE_string(out_pca_transformation, "", "");
+
+// Additional processing.
 DEFINE_bool(run_face_labeling, false, "");
 DEFINE_bool(run_part_disassembly, false, "");
 DEFINE_bool(run_component_disassembly, false, "");
 DEFINE_bool(run_point_sampling, false, "");
+DEFINE_bool(run_point_transformation, false, "");
 DEFINE_bool(run_barycenter_coloring, false, "");
 DEFINE_bool(run_contacting_point_labeling, false, "");
 
@@ -57,17 +56,6 @@ DEFINE_int32(min_num_components, 3, "");
 DEFINE_double(min_component_bbox_diagonal, 0.05, "");
 DEFINE_bool(find_symmetric_components, false, "");
 
-// Point sampling params.
-DEFINE_int32(num_sample_points, 1024, "");
-DEFINE_string(out_point_set_dir, "", "output point set directory.");
-DEFINE_string(out_position_dir, "", "directory of center positions.");
-DEFINE_string(out_pca_alignment_dir, "",
-    "directory of PCA alignment transformation matrix.");
-DEFINE_string(out_centered_point_set_dir, "",
-    "output centered point set directory.");
-DEFINE_string(out_pca_aligned_point_set_dir, "",
-    "output PCA-aligned point set directory.");
-
 // Barycenter-based mesh coloring params.
 DEFINE_string(coloring_reference_mesh, "", "");
 
@@ -75,78 +63,58 @@ DEFINE_string(coloring_reference_mesh, "", "");
 DEFINE_string(out_point_labels, "", "output point label file.");
 DEFINE_double(max_contacting_squared_distance, 0.005 * 0.005, "");
 
-// Transform mesh.
-DEFINE_string(transformation, "", "");
 
-// Translate mesh.
-DEFINE_string(translation, "", "");
+void LibiglMesh::mesh_processing() {
+  bool mesh_modified = false;
 
-
-void LibiglMesh::normalize_mesh(MatrixXd& _V) {
-  const auto bb_min = _V.colwise().minCoeff();
-  const auto bb_max = _V.colwise().maxCoeff();
-  const auto center = 0.5 * (bb_max + bb_min);
-  const double bbox_diagonal = (bb_max - bb_min).norm();
-  CHECK_GT(bbox_diagonal, 1.0E-6);
-
-  // Move center to (0,0,0).
-  _V = _V.rowwise() - center;
-
-  // Scale to bounding box diagonal 1.
-  _V /= bbox_diagonal;
-}
-
-void LibiglMesh::transform_mesh(const std::string& _filename) {
-  Matrix4d mat;
-  if (!Utils::read_eigen_matrix_from_file(_filename, &mat)) {
-    return;
+  // Centerize.
+  if (FLAGS_centerize) {
+    V_ = V_.rowwise() - center_.transpose();
+    mesh_modified = true;
   }
 
-  Affine3d T(mat);
-  Matrix<double, Dynamic, 3> V_copy = V_;
-  V_ = (T * V_copy.transpose()).transpose();
+  // Mesh flipping.
+  if (FLAGS_flip_x) { V_.col(0) = -V_.col(0); mesh_modified = true; }
+  if (FLAGS_flip_y) { V_.col(1) = -V_.col(1); mesh_modified = true; }
+  if (FLAGS_flip_z) { V_.col(2) = -V_.col(2); mesh_modified = true; }
 
-  update_bounding_box();
-  if (renderer_ == nullptr) {
-    LOG(WARNING) << "Renderer is not set";
-  } else {
-    renderer_->set_mesh(V_, F_);
-    renderer_->set_scene_pos(center_.cast<float>(), (float)radius_);
+  if (FLAGS_translation != "") {
+    std::vector<std::string> strs = Utils::split_string(FLAGS_translation);
+    RowVector3d t;
+    t << std::stod(strs[0]), std::stod(strs[1]), std::stod(strs[2]);
+    V_ = V_.rowwise() + t;
+    mesh_modified = true;
   }
-}
-
-void LibiglMesh::processing() {
-	bool mesh_modified = false;
-
-	// Centerize.
-	if (FLAGS_centerize) {
-		V_ = V_.rowwise() - center_.transpose();
-		mesh_modified = true;
-	}
-
-	// Mesh flipping.
-	if (FLAGS_flip_x) { V_.col(0) = -V_.col(0); mesh_modified = true; }
-	if (FLAGS_flip_y) { V_.col(1) = -V_.col(1); mesh_modified = true; }
-	if (FLAGS_flip_z) { V_.col(2) = -V_.col(2); mesh_modified = true; }
 
   if (FLAGS_transformation != "") {
     transform_mesh(FLAGS_transformation);
     mesh_modified = true;
   }
 
-  if (FLAGS_translation != "") {
-    std::vector<std::string> strs = Utils::split_string(FLAGS_translation);
-    RowVector3d t;
-    t << std::stod(strs[0]), std::stod(strs[1]), std::stod(strs[2]);
-		V_ = V_.rowwise() + t;
-    mesh_modified = true;
-  }
-
-	if (mesh_modified) {
-		update_bounding_box();
+  if (mesh_modified) {
+    update_bounding_box();
     renderer_->set_mesh(V_, F_);
     renderer_->set_scene_pos(center_.cast<float>(), (float)radius_);
-	}
+  }
+}
+
+void LibiglMesh::point_set_processing() {
+  if (FLAGS_sample_points) {
+    sample_points_on_mesh(FLAGS_num_sample_points);
+  }
+
+  if (FLAGS_centerize_point_set) {
+    centerize_points(FLAGS_out_point_set_center);
+  }
+
+  if (FLAGS_pca_align_point_set) {
+    pca_align_points(FLAGS_out_pca_transformation);
+  }
+}
+
+void LibiglMesh::processing() {
+  mesh_processing();
+  point_set_processing();
 
   if (FLAGS_run_face_labeling) {
     processing_subdivide_mesh();
@@ -169,15 +137,6 @@ void LibiglMesh::processing() {
         FLAGS_min_num_components,
         FLAGS_min_component_bbox_diagonal,
         FLAGS_find_symmetric_components);
-  }
-  else if (FLAGS_run_point_sampling) {
-    processing_sample_points(
-        FLAGS_num_sample_points,
-        FLAGS_out_point_set_dir,
-        FLAGS_out_pca_alignment_dir,
-        FLAGS_out_position_dir,
-        FLAGS_out_centered_point_set_dir,
-        FLAGS_out_pca_aligned_point_set_dir);
   }
   else if (FLAGS_run_barycenter_coloring) {
     processing_color_barycenter(FLAGS_coloring_reference_mesh);

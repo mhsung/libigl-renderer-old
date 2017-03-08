@@ -26,6 +26,8 @@ DECLARE_double(theta_deg);
 DECLARE_string(projection_matrix);
 DECLARE_string(modelview_matrix);
 DECLARE_string(snapshot);
+DECLARE_string(out_mesh);
+DECLARE_string(out_point_set);
 
 
 class LibiglMeshT {

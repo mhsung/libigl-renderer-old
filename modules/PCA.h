@@ -48,8 +48,43 @@ IGL_INLINE void igl::PCA(
   if ((R_t.col(0).cross(R_t.col(1))).dot(R_t.col(2)) < 0)
     R_t.col(2) = -R_t.col(2);
 
+  T.setIdentity();
   T.pretranslate(-t_t);
-  T.prerotate(R_t.inverse());
+  T.prerotate(R_t.transpose());
+
+  // NOTE:
+  // Assume that the point set is flipped along an axis if more than half of
+  // points have negative coordinates.
+  // Since most components are given as aligned with PCA axes,
+  // we slightly increase the threshold of flipping (0.5 + 0.01).
+  const Eigen::Matrix<double, Dynamic, 3>& P_temp = P;
+  const Eigen::Matrix<double, Dynamic, 3> P_aligned =
+      (T * P_temp.transpose()).transpose();
+
+  const int num_points = P.rows();
+  Vector3i count_minus_coord = Vector3i::Zero();
+  for (int i = 0; i < num_points; ++i) {
+    for (int j = 0; j < 3; ++j) {
+      if (P_aligned(i, j) < 0) ++count_minus_coord[j];
+    }
+  }
+
+  const bool x_flipped = count_minus_coord[0] > (0.5 + 0.01) * num_points;
+  const bool y_flipped = count_minus_coord[1] > (0.5 + 0.01) * num_points;
+
+  Matrix3d R_f = Matrix3d::Identity();
+  if (!x_flipped && y_flipped) {
+    // Rotate along x-axis: (x, y, z) -> (x, -y, -z)
+    R_f = AngleAxisd(M_PI, Vector3d::UnitX()).toRotationMatrix();
+  } else if (x_flipped && !y_flipped) {
+    // Rotate along y-axis: (x, y, z) -> (-x, y, -z)
+    R_f = AngleAxisd(M_PI, Vector3d::UnitY()).toRotationMatrix();
+  } else if(x_flipped && y_flipped) {
+    // Rotate along z-axis: (x, y, z) -> (-x, -y, z)
+    R_f = AngleAxisd(M_PI, Vector3d::UnitZ()).toRotationMatrix();
+  }
+
+  T.prerotate(R_f);
 };
 
 #endif
