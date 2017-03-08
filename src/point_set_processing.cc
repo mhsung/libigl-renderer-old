@@ -52,22 +52,25 @@ void LibiglMesh::pca_align_points(const std::string& _out_file) {
   const Eigen::Matrix<double, Dynamic, 3>& P_temp = P_;
   P_ = (T * P_temp.transpose()).transpose();
 
-  const AngleAxisd R(T.rotation());
-  double angle = R.angle();
+  // NOTE:
+  // P.transpose == R * P_aligned.transpose() + t
+  Affine3d T_inv = T.inverse();
+  const Matrix3d R = T_inv.rotation();
+  const Vector3d t = T_inv.translation();
+
+  const AngleAxisd rotation(R);
+  double angle = rotation.angle();
   while (angle < 0) angle += 2 * M_PI;
   while (angle > 2 * M_PI) angle -= 2 * M_PI;
-  Vector3d axis = R.axis().normalized();
+  Vector3d axis = rotation.axis().normalized();
   const Vector3d r = angle * axis;
-
-  const Vector3d t = T.translation();
 
   // Scale along the first PCA axis.
   const double s = P_.col(0).maxCoeff() - P_.col(0).minCoeff();
 
-  RowVectorXd transformation(7);
+  VectorXd transformation(7);
   transformation << r, t, s;
-
   if (_out_file != "") {
-    Utils::write_eigen_matrix_to_file(_out_file, transformation);
+    Utils::write_eigen_matrix_to_file(_out_file, transformation.transpose());
   }
 }
