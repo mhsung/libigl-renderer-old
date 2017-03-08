@@ -159,12 +159,26 @@ bool LibiglMeshT::write_bounding_box(const std::string& _filename) {
 }
 
 void LibiglMeshT::pre_processing() {
-  if (!read_mesh(FLAGS_mesh)) {
-    return;
+  if (FLAGS_mesh != "") {
+    if (!read_mesh(FLAGS_mesh)) {
+      return;
+    }
   }
 
   if (FLAGS_face_labels != "") {
     if (!read_face_labels(FLAGS_face_labels)) {
+      return;
+    }
+  }
+
+  if (FLAGS_point_set != "") {
+    if (!read_point_set(FLAGS_point_set)) {
+      return;
+    }
+  }
+
+  if (FLAGS_point_labels != "") {
+    if (!read_point_labels(FLAGS_point_labels)) {
       return;
     }
   }

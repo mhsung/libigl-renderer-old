@@ -119,8 +119,6 @@ void LibiglMesh::processing() {
   if (FLAGS_run_face_labeling) {
     processing_subdivide_mesh();
     processing_project_pts_labels_to_mesh(
-        FLAGS_point_set,
-        FLAGS_point_labels,
         FLAGS_out_face_labels);
   }
   else if (FLAGS_run_part_disassembly) {
@@ -143,7 +141,6 @@ void LibiglMesh::processing() {
   }
   else if (FLAGS_run_contacting_point_labeling) {
     processing_label_contacting_points(
-        FLAGS_point_set,
         FLAGS_out_point_labels,
         FLAGS_max_contacting_squared_distance);
   }

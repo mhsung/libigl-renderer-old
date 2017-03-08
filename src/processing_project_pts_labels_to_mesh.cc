@@ -29,14 +29,8 @@
 
 // Last modified: 01-09-2017
 void LibiglMesh::processing_project_pts_labels_to_mesh(
-    const std::string& _point_set_file,
-    const std::string& _point_labels_file,
     const std::string& _out_face_labels_file) {
-  // Read point set and labels.
-  if (!read_point_set(_point_set_file)) return;
   const int num_points = P_.rows();
-
-  if (!read_point_labels(_point_labels_file)) return;
   const VectorXi label_set = Utils::unique(PL_);
   const int num_labels = label_set.size();
 

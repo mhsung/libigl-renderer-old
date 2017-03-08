@@ -54,8 +54,6 @@ class LibiglMesh : public LibiglMeshT {
     void processing_subdivide_mesh();
 
     void processing_project_pts_labels_to_mesh(
-        const std::string& _point_set_file,
-        const std::string& _point_labels_file,
         const std::string& _out_face_labels_file);
 
     void processing_disassemble_to_parts(
@@ -81,7 +79,6 @@ class LibiglMesh : public LibiglMeshT {
         const std::string& _coloring_reference_mesh_file);
 
     void processing_label_contacting_points(
-        const std::string& _point_set_file,
         const std::string& _out_point_labels_file,
         const double _max_contacting_squared_distance);
 };

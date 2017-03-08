@@ -21,11 +21,8 @@
 
 
 void LibiglMesh::processing_label_contacting_points(
-    const std::string& _point_set_file,
     const std::string& _out_point_labels_file,
     const double _max_contacting_squared_distance) {
-  // Read point set and labels.
-  if (!read_point_set(_point_set_file)) return;
   const int num_points = P_.rows();
 
   const VectorXi label_set = Utils::unique(FL_);
