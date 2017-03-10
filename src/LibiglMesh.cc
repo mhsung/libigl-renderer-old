@@ -14,8 +14,9 @@ DEFINE_bool(centerize, false, "");
 DEFINE_bool(flip_x, false, "");
 DEFINE_bool(flip_y, false, "");
 DEFINE_bool(flip_z, false, "");
-DEFINE_string(translation, "", "");
-DEFINE_string(transformation, "", "");
+DEFINE_string(translation, "", "(tx, ty, tz)");
+DEFINE_string(transformation, "", "(rx, ry, rz, tx, ty, tz)");
+DEFINE_string(inverse_transformation, "", "(rx, ry, rz, tx, ty, tz)");
 
 // Point set processing.
 DEFINE_bool(sample_points, false, "");
@@ -80,14 +81,31 @@ void LibiglMesh::mesh_processing() {
 
   if (FLAGS_translation != "") {
     std::vector<std::string> strs = Utils::split_string(FLAGS_translation);
-    RowVector3d t;
-    t << std::stod(strs[0]), std::stod(strs[1]), std::stod(strs[2]);
-    V_ = V_.rowwise() + t;
+    CHECK_EQ(strs.size(), 3);
+    Vector3d t;
+    for (int i = 0; i < 3; ++i) t[i] = std::stod(strs[i]);
+    translate_mesh(V_, t);
     mesh_modified = true;
   }
 
   if (FLAGS_transformation != "") {
-    transform_mesh(FLAGS_transformation);
+    std::vector<std::string> strs = Utils::split_string(FLAGS_transformation);
+    CHECK_EQ(strs.size(), 6);
+    Vector3d r, t;
+    for (int i = 0; i < 3; ++i) r[i] = std::stod(strs[0 + i]);
+    for (int i = 0; i < 3; ++i) t[i] = std::stod(strs[3 + i]);
+    transform_mesh(V_, r, t);
+    mesh_modified = true;
+  }
+
+  if (FLAGS_inverse_transformation != "") {
+    std::vector<std::string> strs = Utils::split_string(
+        FLAGS_inverse_transformation);
+    CHECK_EQ(strs.size(), 6);
+    Vector3d r, t;
+    for (int i = 0; i < 3; ++i) r[i] = std::stod(strs[0 + i]);
+    for (int i = 0; i < 3; ++i) t[i] = std::stod(strs[3 + i]);
+    inverse_transform_mesh(V_, r, t);
     mesh_modified = true;
   }
 

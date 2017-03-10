@@ -32,10 +32,15 @@ class LibiglMesh : public LibiglMeshT {
     void upsample_mesh(
         const double edge_length_tol, const int max_loop_iters = 10);
 
-    void transform_mesh(const std::string& _filename);
+    void translate_mesh(MatrixXd& _V, const Vector3d& _t);
+
+    void transform_mesh(MatrixXd& _V, const Vector3d& _r, const Vector3d& _t);
+
+    void inverse_transform_mesh(
+        MatrixXd& _V, const Vector3d& _r, const Vector3d& _t);
 
     // Move center to (0,0,0) and scale to bounding box diagonal 1.
-    void normalize_mesh(MatrixXd& V);
+    void normalize_mesh(MatrixXd& _V);
 
 
   // -- Simple point set processing -- //

@@ -60,9 +60,17 @@ void LibiglMesh::pca_align_points(const std::string& _out_file) {
 
   const AngleAxisd rotation(R);
   double angle = rotation.angle();
-  while (angle < 0) angle += 2 * M_PI;
-  while (angle > 2 * M_PI) angle -= 2 * M_PI;
+  // Make angle to be in [0, 2*pi) range.
+  while (angle < 0) angle += (2 * M_PI);
+  while (angle > 2 * M_PI) angle -= (2 * M_PI);
   Vector3d axis = rotation.axis().normalized();
+
+  // Flip the axis if the angle is in (pi, 2*pi) range.
+  if (angle > M_PI) {
+    angle = (2 * M_PI) - angle;
+    axis = -axis;
+  }
+
   const Vector3d r = angle * axis;
 
   // Scale along the first PCA axis.
