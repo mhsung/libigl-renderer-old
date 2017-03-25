@@ -7,7 +7,7 @@
 #define IGL_REMOVE_DUPLICATES_CUSTOM_H
 
 #include <igl/igl_inline.h>
-#include <igl/sort.h>
+#include <igl/sortrows.h>
 #include <utils/kd_tree.h>
 
 #include <Eigen/Core>
@@ -45,12 +45,11 @@ namespace igl
   template <typename DerivedF>
   IGL_INLINE void remove_duplicate_faces_custom(
     const Eigen::PlainObjectBase<DerivedF>& F,
-    Eigen::PlainObjectBase<DerivedF>& newF,
-    const int max_K = 16);
+    Eigen::PlainObjectBase<DerivedF>& newF);
 
   template <typename MatF>
   IGL_INLINE void remove_duplicate_faces_custom(
-    MatF& F, const int max_K = 16);
+    MatF& F);
 }
 
 //#ifndef IGL_STATIC_LIBRARY
@@ -139,8 +138,7 @@ IGL_INLINE void igl::remove_duplicate_vertices_custom(
 template <typename DerivedF>
 IGL_INLINE void igl::remove_duplicate_faces_custom(
     const Eigen::PlainObjectBase<DerivedF>& F,
-    Eigen::PlainObjectBase<DerivedF>& newF,
-    const int max_K)
+    Eigen::PlainObjectBase<DerivedF>& newF)
 {
   // Assume triangular mesh.
   assert(F.cols() == 3);
@@ -191,10 +189,10 @@ IGL_INLINE void igl::remove_duplicate_faces_custom(
 
 template <typename MatF>
 IGL_INLINE void igl::remove_duplicate_faces_custom(
-    MatF& F, const int max_K)
+    MatF& F)
 {
   const MatF F_copy = F;
-  remove_duplicate_faces_custom(F_copy,F,max_K);
+  remove_duplicate_faces_custom(F_copy,F);
 }
 
 #endif

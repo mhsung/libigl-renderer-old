@@ -8,15 +8,22 @@
 #include "LibiglMesh.h"
 
 #include <Eigen/Geometry>
+#include <igl/doublearea.h>
 #include <igl/random_points_on_mesh.h>
 #include <modules/PCA.h>
+#include <modules/remove_duplicates_custom.h>
 #include <utils/utils.h>
 
 
 void LibiglMesh::sample_points_on_mesh(const int num_points) {
+  // NOTE: 03-24-2017
+  // Remove duplicated faces in mesh before sampling points.
+  MatrixXi newF;
+  igl::remove_duplicate_faces_custom(F_, newF);
+
   SparseMatrix<double> B;
   VectorXi FI;
-  igl::random_points_on_mesh(num_points, V_, F_, B, FI);
+  igl::random_points_on_mesh(num_points, V_, newF, B, FI);
   P_ = B * V_;
 }
 
@@ -28,15 +35,22 @@ void LibiglMesh::centerize_points(const std::string& _out_file) {
   const RowVector3d center = P_.colwise().mean();
   const auto bb_min = P_.colwise().minCoeff();
   const auto bb_max = P_.colwise().maxCoeff();
-  const double bbox_diagonal = (bb_max - bb_min).norm();
+
+  // NOTE: 03-24-2017
+  // Use sum of face areas as size instead of bounding box diagonal.
+  //const double bbox_diagonal = (bb_max - bb_min).norm();
+  VectorXd FA;
+  igl::doublearea(V_, F_, FA);
+  const double sum_facea_areas = 0.5 * FA.sum();
 
   // Centerize point set.
   P_ = P_.rowwise() - center;
 
   if (_out_file != "") {
-    RowVector4d center_and_size;
-    center_and_size << center, bbox_diagonal;
-    Utils::write_eigen_matrix_to_file(_out_file, center_and_size);
+    RowVector4d center_and_area;
+    //center_and_area << center, bbox_diagonal;
+    center_and_area << center, sum_facea_areas;
+    Utils::write_eigen_matrix_to_file(_out_file, center_and_area);
   }
 }
 
