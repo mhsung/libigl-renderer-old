@@ -32,9 +32,14 @@ void LibiglMesh::centerize_points(const std::string& _out_file) {
   CHECK_GT(num_samples, 0);
 
   // Compute center and bounding box diagonal.
-  const RowVector3d center = P_.colwise().mean();
   const auto bb_min = P_.colwise().minCoeff();
   const auto bb_max = P_.colwise().maxCoeff();
+
+  // NOTE: 03-24-2017
+  // Use bounding box center as center instead of mean of point positions.
+  //const RowVector3d center = P_.colwise().mean();
+  const RowVector3d bb_center = 0.5 * (bb_min + bb_max);
+
 
   // NOTE: 03-24-2017
   // Use sum of face areas as size instead of bounding box diagonal.
@@ -46,12 +51,12 @@ void LibiglMesh::centerize_points(const std::string& _out_file) {
   const double sum_face_areas = 0.5 * FA.sum();
 
   // Centerize point set.
-  P_ = P_.rowwise() - center;
+  P_ = P_.rowwise() - bb_center;
 
   if (_out_file != "") {
     RowVector4d center_and_area;
     //center_and_area << center, bbox_diagonal;
-    center_and_area << center, sum_face_areas;
+    center_and_area << bb_center, sum_face_areas;
     Utils::write_eigen_matrix_to_file(_out_file, center_and_area);
   }
 }
