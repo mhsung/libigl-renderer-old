@@ -39,9 +39,11 @@ void LibiglMesh::centerize_points(const std::string& _out_file) {
   // NOTE: 03-24-2017
   // Use sum of face areas as size instead of bounding box diagonal.
   //const double bbox_diagonal = (bb_max - bb_min).norm();
+  MatrixXi newF;
+  igl::remove_duplicate_faces_custom(F_, newF);
   VectorXd FA;
-  igl::doublearea(V_, F_, FA);
-  const double sum_facea_areas = 0.5 * FA.sum();
+  igl::doublearea(V_, newF, FA);
+  const double sum_face_areas = 0.5 * FA.sum();
 
   // Centerize point set.
   P_ = P_.rowwise() - center;
@@ -49,7 +51,7 @@ void LibiglMesh::centerize_points(const std::string& _out_file) {
   if (_out_file != "") {
     RowVector4d center_and_area;
     //center_and_area << center, bbox_diagonal;
-    center_and_area << center, sum_facea_areas;
+    center_and_area << center, sum_face_areas;
     Utils::write_eigen_matrix_to_file(_out_file, center_and_area);
   }
 }
