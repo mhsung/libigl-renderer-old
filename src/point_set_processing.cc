@@ -94,11 +94,19 @@ void LibiglMesh::pca_align_points(const std::string& _out_file) {
 
   const Vector3d r = angle * axis;
 
+  // NOTE: 03-24-2017
+  // Add sum of face areas.
+  MatrixXi newF;
+  igl::remove_duplicate_faces_custom(F_, newF);
+  VectorXd FA;
+  igl::doublearea(V_, newF, FA);
+  const double a = 0.5 * FA.sum();
+
   // Scale along the first PCA axis.
   const double s = P_.col(0).maxCoeff() - P_.col(0).minCoeff();
 
-  VectorXd transformation(7);
-  transformation << r, t, s;
+  VectorXd transformation(8);
+  transformation << r, t, a, s;
   if (_out_file != "") {
     Utils::write_eigen_matrix_to_file(_out_file, transformation.transpose());
   }

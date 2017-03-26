@@ -30,7 +30,6 @@ DEFINE_string(out_pca_transformation, "", "");
 DEFINE_bool(run_face_labeling, false, "");
 DEFINE_bool(run_part_disassembly, false, "");
 DEFINE_bool(run_component_disassembly, false, "");
-DEFINE_bool(run_point_sampling, false, "");
 DEFINE_bool(run_point_transformation, false, "");
 DEFINE_bool(run_barycenter_coloring, false, "");
 DEFINE_bool(run_contacting_point_labeling, false, "");
