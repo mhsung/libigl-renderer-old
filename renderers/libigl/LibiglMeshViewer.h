@@ -10,7 +10,7 @@
 
 #include <string>
 #include <Eigen/Core>
-#include <igl/viewer/viewer.h>
+#include <igl/viewer/Viewer.h>
 
 #include "LibiglMeshRendererT.h"
 
