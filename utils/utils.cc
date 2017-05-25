@@ -13,6 +13,17 @@
 
 namespace Utils {
 
+std::vector<std::string> split_string(
+    const std::string& _str, const char delim) {
+  std::stringstream sstr(_str);
+  std::vector<std::string> tokens;
+  std::string token;
+  while (std::getline(sstr, token, delim)) {
+    tokens.push_back(token);
+  }
+  return tokens;
+}
+
 void hsv2rgb(
     const float h, const float s, const float v,
     float& r, float& g, float& b) {
@@ -76,7 +87,7 @@ void random_label_rgb_color(
   CHECK_GE(_label, 0);
 
   if (_label == 0) {
-    _color->setZero();
+    _color->setConstant(0.5f);
     return;
   }
 
@@ -94,17 +105,6 @@ void random_label_rgb_color(
   float r, g, b;
   hsv2rgb(h, 0.9f, 0.9f, r, g, b);
   (*_color) << r, g, b;
-}
-
-std::vector<std::string> split_string(
-    const std::string& _str, const char delim) {
-  std::stringstream sstr(_str);
-  std::vector<std::string> tokens;
-  std::string token;
-  while (std::getline(sstr, token, delim)) {
-    tokens.push_back(token);
-  }
-  return tokens;
 }
 
 }

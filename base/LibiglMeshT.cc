@@ -7,6 +7,8 @@
 
 #include "LibiglMeshT.h"
 
+#include <igl/per_face_normals.h>
+#include <igl/per_vertex_normals.h>
 #include <igl/read_triangle_mesh.h>
 #include <igl/write_triangle_mesh.h>
 #include <utils/filesystem/path.h>
@@ -90,7 +92,7 @@ bool LibiglMeshT::read_point_labels(const std::string& _filename) {
   }
 
   // Set point colors.
-  set_point_label_colors();
+  //set_point_label_colors();
   return true;
 }
 
@@ -225,6 +227,10 @@ void LibiglMeshT::post_processing() {
   if (FLAGS_out_point_set != "") {
     Utils::write_eigen_matrix_to_file(FLAGS_out_point_set, P_, ' ');
   }
+
+  // Compute normals.
+  igl::per_face_normals(V_, F_, FN_);
+  igl::per_vertex_normals(V_, F_, FN_, VN_);
 
 #ifdef USE_OSMESA
   renderer_->snapshot(FLAGS_snapshot);

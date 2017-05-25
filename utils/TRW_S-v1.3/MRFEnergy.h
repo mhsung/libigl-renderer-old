@@ -421,7 +421,7 @@ template <class T> void MRFEnergy<T>::CompleteGraphConstruction()
 		m_errorFn("Fatal error in CompleteGraphConstruction");
 	}
 
-	printf("Completing graph construction... ");
+	//printf("Completing graph construction... ");
 
 	if (m_buf)
 	{
@@ -501,7 +501,7 @@ template <class T> void MRFEnergy<T>::CompleteGraphConstruction()
 
 	// ZeroMessages();
 
-	printf("done\n");
+	//printf("done\n");
 }
 
 template <class T> void MRFEnergy<T>::SetAutomaticOrdering()
@@ -518,7 +518,7 @@ template <class T> void MRFEnergy<T>::SetAutomaticOrdering()
 		m_errorFn("Error in SetAutomaticOrdering(): function cannot be called after graph construction is completed");
 	}
 
-	printf("Setting automatic ordering... ");
+	//printf("Setting automatic ordering... ");
 
 	list = m_nodeFirst;
 	listBoundary = NULL;
@@ -651,7 +651,7 @@ template <class T> void MRFEnergy<T>::SetAutomaticOrdering()
 		}
 	}
 
-	printf("done\n");
+	//printf("done\n");
 
 	CompleteGraphConstruction();
 }
@@ -670,7 +670,7 @@ template <class T> int MRFEnergy<T>::Minimize_TRW_S(Options& options, REAL& lowe
 		CompleteGraphConstruction();
 	}
 
-	printf("TRW_S algorithm\n");
+	//printf("TRW_S algorithm\n");
 
 	SetMonotonicTrees();
 
@@ -776,7 +776,7 @@ template <class T> int MRFEnergy<T>::Minimize_TRW_S(Options& options, REAL& lowe
 		)
 		{
 			energy = ComputeSolutionAndEnergy();
-			printf("iter %d: lower bound = %f, energy = %f\n", iter, lowerBound, energy);
+			//printf("iter %d: lower bound = %f, energy = %f\n", iter, lowerBound, energy);
 		}
 
 		if (lastIter) break;
@@ -808,7 +808,7 @@ template <class T> int MRFEnergy<T>::Minimize_BP(Options& options, REAL& energy,
 		CompleteGraphConstruction();
 	}
 
-	printf("BP algorithm\n");
+	//printf("BP algorithm\n");
 
 	Vector* Di = (Vector*) m_buf;
 	void* buf = (void*) (m_buf + m_vectorMaxSizeInBytes);
@@ -903,7 +903,7 @@ template <class T> int MRFEnergy<T>::Minimize_BP(Options& options, REAL& energy,
 		)
 		{
 			energy = ComputeSolutionAndEnergy();
-			printf("iter %d: energy = %f\n", iter, energy);
+			//printf("iter %d: energy = %f\n", iter, energy);
 		}
 
 		// if finishFlag==true terminate

@@ -39,25 +39,25 @@ void LibiglMesh::processing_disassemble_to_parts(
   const int num_digits = std::to_string(label_set.maxCoeff()).size();
 
   // Create root output mesh directory.
-  const filesystem::path part_mesh_root_dir(_out_part_mesh_dir);
-  if (_out_part_mesh_dir != "" && !part_mesh_root_dir.is_directory()) {
-    CHECK(filesystem::create_directory(part_mesh_root_dir));
+  const filesystem::path part_mesh_dir(_out_part_mesh_dir);
+  if (_out_part_mesh_dir != "" && !part_mesh_dir.is_directory()) {
+    CHECK(filesystem::create_directory(part_mesh_dir));
   }
 
   // Create root output mesh directory.
-  const filesystem::path part_mesh_unnormalized_root_dir(
+  const filesystem::path part_mesh_unnormalized_dir(
       _out_part_mesh_unnormalized_dir);
   if (_out_part_mesh_unnormalized_dir != "" &&
-      !part_mesh_unnormalized_root_dir.is_directory()) {
-    CHECK(filesystem::create_directory(part_mesh_unnormalized_root_dir));
+      !part_mesh_unnormalized_dir.is_directory()) {
+    CHECK(filesystem::create_directory(part_mesh_unnormalized_dir));
   }
 
   // Create root output face map directory.
-  const filesystem::path part_mesh_face_map_root_dir(
+  const filesystem::path part_mesh_face_map_dir(
       _out_part_mesh_face_map_dir);
   if (_out_part_mesh_face_map_dir != "" &&
-      !part_mesh_face_map_root_dir.is_directory()) {
-    CHECK(filesystem::create_directory(part_mesh_face_map_root_dir));
+      !part_mesh_face_map_dir.is_directory()) {
+    CHECK(filesystem::create_directory(part_mesh_face_map_dir));
   }
 
   // Process each part.
@@ -78,13 +78,8 @@ void LibiglMesh::processing_disassemble_to_parts(
 
     // Write unnormalized part mesh.
     if (_out_part_mesh_unnormalized_dir != "") {
-      const filesystem::path part_mesh_unnormalized_dir =
-          part_mesh_unnormalized_root_dir / filesystem::path(label_sstr.str());
-      if (!part_mesh_unnormalized_dir.is_directory()) {
-        CHECK(filesystem::create_directory(part_mesh_unnormalized_dir));
-      }
-      const filesystem::path part_mesh_file =
-          part_mesh_unnormalized_dir / filesystem::path(mesh_name_);
+      const filesystem::path part_mesh_file = part_mesh_unnormalized_dir /
+        filesystem::path(label_sstr.str() + std::string(".obj"));
       igl::write_triangle_mesh(part_mesh_file.str(), label_V, label_F);
     }
 
@@ -92,25 +87,15 @@ void LibiglMesh::processing_disassemble_to_parts(
     normalize_mesh(label_V);
 
     if (_out_part_mesh_dir != "") {
-      const filesystem::path part_mesh_dir =
-          part_mesh_root_dir / filesystem::path(label_sstr.str());
-      if (!part_mesh_dir.is_directory()) {
-        CHECK(filesystem::create_directory(part_mesh_dir));
-      }
-      const filesystem::path part_mesh_file =
-          part_mesh_dir / filesystem::path(mesh_name_);
+      const filesystem::path part_mesh_file = part_mesh_dir /
+        filesystem::path(label_sstr.str() + std::string(".obj"));
       igl::write_triangle_mesh(part_mesh_file.str(), label_V, label_F);
     }
 
     // Write part mesh face map to input mesh.
     if (_out_part_mesh_face_map_dir != "") {
-      const filesystem::path part_mesh_face_map_dir =
-          part_mesh_face_map_root_dir / filesystem::path(label_sstr.str());
-      if (!part_mesh_face_map_dir.is_directory()) {
-        CHECK(filesystem::create_directory(part_mesh_face_map_dir));
-      }
-      const filesystem::path part_mesh_face_map_file =
-          part_mesh_face_map_dir / filesystem::path(mesh_name_);
+      const filesystem::path part_mesh_face_map_file = part_mesh_face_map_dir /
+        filesystem::path(label_sstr.str() + std::string(".seg"));
       Utils::write_eigen_matrix_to_file(
           part_mesh_face_map_file.str(), label_fids);
     }

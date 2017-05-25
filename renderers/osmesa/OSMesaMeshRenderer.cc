@@ -165,9 +165,12 @@ void OSMesaMeshRenderer::set_default_light() {
   GLfloat pos1[] = { 1, 1, -0.2, 0.0 };
   GLfloat pos2[] = { -1, 1, -0.2, 0.0 };
   GLfloat pos3[] = { 0, 0, 1, 0.0 };
-  GLfloat col1[] = { 0.7, 0.7, 0.8, 1.0 };
-  GLfloat col2[] = { 0.8, 0.7, 0.7, 1.0 };
-  GLfloat col3[] = { 1.0, 1.0, 1.0, 1.0 };
+  //GLfloat col1[] = { 0.7, 0.7, 0.8, 1.0 };
+  //GLfloat col2[] = { 0.8, 0.7, 0.7, 1.0 };
+  //GLfloat col3[] = { 1.0, 1.0, 1.0, 1.0 };
+  GLfloat col1[] = { 0.21, 0.21, 0.24, 1.0 };
+  GLfloat col2[] = { 0.24, 0.21, 0.21, 1.0 };
+  GLfloat col3[] = { 0.3, 0.3, 0.3, 1.0 };
 
   glEnable(GL_LIGHT0);
   glLightfv(GL_LIGHT0, GL_POSITION, pos1);
@@ -194,9 +197,9 @@ void OSMesaMeshRenderer::render() {
 
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   // TODO(mhsung): Use lighting.
-  // glEnable(GL_LIGHTING);
-  // glShadeModel(GL_SMOOTH);
-  glDisable(GL_LIGHTING);
+  glEnable(GL_LIGHTING);
+  glShadeModel(GL_SMOOTH);
+  //glDisable(GL_LIGHTING);
 
   render_point_set();
   render_mesh();
@@ -207,24 +210,26 @@ void OSMesaMeshRenderer::render() {
 void OSMesaMeshRenderer::render_mesh() {
   const bool has_face_color = (FC_.rows() == F_.rows());
 
+  glCullFace(GL_FRONT_AND_BACK);
+
   glEnableClientState(GL_VERTEX_ARRAY);
   glVertexPointer(3, GL_DOUBLE, 0, V_.data());
 
   glEnableClientState(GL_NORMAL_ARRAY);
-  glNormalPointer(GL_DOUBLE, 0, V_.data());
+  glNormalPointer(GL_DOUBLE, 0, VN_.data());
 
   glBegin(GL_TRIANGLES);
   for (int fid = 0; fid < F_.rows(); ++fid) {
     if (has_face_color) {
-      const Vector3f color = FC_.row(fid);
-      glColor3fv(color.data());
-      // const Vector4f color(FC_(fid, 0), FC_(fid, 1), FC_(fid, 2), 1.0f);
-      // glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, color.data());
-      // glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, color.data());
-      // glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, color.data());
+      //const Vector3f color = FC_.row(fid);
+      //glColor3fv(color.data());
+      const Vector4f color(FC_(fid, 0), FC_(fid, 1), FC_(fid, 2), 1.0f);
+      glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, color.data());
+      glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, color.data());
+      glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, color.data());
     } else {
-      //set_default_material();
-      glColor4fv(igl::MAYA_GREY.data());
+      set_default_material();
+      //glColor4fv(igl::MAYA_GREY.data());
     }
 
     for (int i = 0; i < 3; ++i) {

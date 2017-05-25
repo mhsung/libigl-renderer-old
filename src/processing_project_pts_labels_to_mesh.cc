@@ -109,6 +109,7 @@ void LibiglMesh::processing_project_pts_labels_to_mesh(
   }
   LOG(INFO) << "Max. Binary energy: " << max_penalty;
 
+  /*
   // Enforce symmetric faces to have the same label.
   // Symmetry axis: Z-axis.
   const double kMRFMax = 1.0E6;
@@ -121,13 +122,14 @@ void LibiglMesh::processing_project_pts_labels_to_mesh(
       edge_coeffs.emplace_back(fid, SFI[fid], kMRFMax);
     }
   }
+  */
 
   // Compute CRF binary terms.
   SparseMatrix<double> CRFBinary(n_faces(), n_faces());
   CRFBinary.setFromTriplets(edge_coeffs.begin(), edge_coeffs.end());
 
   // Run MRF solver and set face labels.
-  const int kMaxMRFIters = 300;
+  const int kMaxMRFIters = 100;
   const VectorXi face_label_idxs = MRFEigen::solve_mrf_potts(
       CRFUnary, CRFBinary, MRFEigen::BP, kMaxMRFIters);
   FL_ = Utils::slice_rows(label_set, face_label_idxs);

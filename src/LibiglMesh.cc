@@ -134,11 +134,12 @@ void LibiglMesh::processing() {
   point_set_processing();
 
   if (FLAGS_run_face_labeling) {
-    processing_subdivide_mesh();
+    //processing_subdivide_mesh();
     processing_project_pts_labels_to_mesh(
         FLAGS_out_face_labels);
   }
-  else if (FLAGS_run_part_disassembly) {
+
+  if (FLAGS_run_part_disassembly) {
     processing_disassemble_to_parts(
         FLAGS_out_part_mesh_dir,
         FLAGS_out_part_mesh_unnormalized_dir,

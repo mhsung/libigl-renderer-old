@@ -135,3 +135,14 @@ endif()
 
 target_link_libraries(${PROJECT_NAME} ${GFLAGS_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} ${GLOG_LIBRARIES})
+
+# Add PThread
+find_package(Threads REQUIRED)
+if(THREADS_HAVE_PTHREAD_ARG)
+  set_property(TARGET ${PROJECT_NAME} PROPERTY COMPILE_OPTIONS "-pthread")
+  set_property(TARGET ${PROJECT_NAME} PROPERTY INTERFACE_COMPILE_OPTIONS "-pthread")
+endif()
+if(CMAKE_THREAD_LIBS_INIT)
+  target_link_libraries(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
+endif()
+
