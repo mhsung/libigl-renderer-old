@@ -103,7 +103,7 @@ void random_label_rgb_color(
                   / std::numeric_limits<uint32_t>::max();
   const float h = std::fmod(s + (_label * kGoldenRatioConjugate), 1.0f);
   float r, g, b;
-  hsv2rgb(h, 0.9f, 0.9f, r, g, b);
+  hsv2rgb(h, 0.8f, 0.8f, r, g, b);
   (*_color) << r, g, b;
 }
 

@@ -210,7 +210,7 @@ void OSMesaMeshRenderer::render() {
 void OSMesaMeshRenderer::render_mesh() {
   const bool has_face_color = (FC_.rows() == F_.rows());
 
-  glCullFace(GL_FRONT_AND_BACK);
+  glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
 
   glEnableClientState(GL_VERTEX_ARRAY);
   glVertexPointer(3, GL_DOUBLE, 0, V_.data());
