@@ -47,7 +47,7 @@ class LibiglMesh : public LibiglMeshT {
   protected:
     void point_set_processing();
 
-    void sample_points_on_mesh(const int num_points);
+    void sample_points_on_mesh(const int _num_points, const bool _with_normals);
 
     void centerize_points(const std::string& _out_file = "");
 

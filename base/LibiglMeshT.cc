@@ -225,7 +225,17 @@ void LibiglMeshT::post_processing() {
   }
 
   if (FLAGS_out_point_set != "") {
-    Utils::write_eigen_matrix_to_file(FLAGS_out_point_set, P_, ' ');
+    if (P_.rows() == PN_.rows()) {
+      const int n_points = P_.rows();
+      CHECK_EQ(P_.cols(), 3);
+      CHECK_EQ(PN_.cols(), 3);
+      MatrixXd P_and_PN(n_points, 6);
+      P_and_PN.leftCols(3) = P_;
+      P_and_PN.rightCols(3) = PN_;
+      Utils::write_eigen_matrix_to_file(FLAGS_out_point_set, P_and_PN, ' ');
+    } else {
+      Utils::write_eigen_matrix_to_file(FLAGS_out_point_set, P_, ' ');
+    }
   }
 
   // Compute normals.

@@ -78,8 +78,9 @@ class LibiglMeshT {
 
     // Point set.
     MatrixXd P_;
-    VectorXi PL_;
     MatrixXf PC_;
+    VectorXi PL_;
+    MatrixXd PN_;
 
     Vector3d bb_min_;
     Vector3d bb_max_;

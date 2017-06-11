@@ -20,6 +20,7 @@ DEFINE_string(inverse_transformation, "", "(rx, ry, rz, tx, ty, tz)");
 
 // Point set processing.
 DEFINE_bool(sample_points, false, "");
+DEFINE_bool(with_normals, false, "");
 DEFINE_int32(num_sample_points, 1024, "");
 DEFINE_bool(centerize_point_set, false, "");
 DEFINE_string(out_point_set_center, "", "");
@@ -117,7 +118,7 @@ void LibiglMesh::mesh_processing() {
 
 void LibiglMesh::point_set_processing() {
   if (FLAGS_sample_points) {
-    sample_points_on_mesh(FLAGS_num_sample_points);
+    sample_points_on_mesh(FLAGS_num_sample_points, FLAGS_with_normals);
   }
 
   if (FLAGS_centerize_point_set) {

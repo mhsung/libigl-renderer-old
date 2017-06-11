@@ -9,13 +9,15 @@
 
 #include <Eigen/Geometry>
 #include <igl/doublearea.h>
+#include <igl/per_face_normals.h>
 #include <igl/random_points_on_mesh.h>
 #include <modules/PCA.h>
 #include <modules/remove_duplicates_custom.h>
 #include <utils/utils.h>
 
 
-void LibiglMesh::sample_points_on_mesh(const int num_points) {
+void LibiglMesh::sample_points_on_mesh(
+    const int _num_points, const bool _with_normals) {
   // NOTE: 03-24-2017
   // Remove duplicated faces in mesh before sampling points.
   MatrixXi newF;
@@ -23,8 +25,13 @@ void LibiglMesh::sample_points_on_mesh(const int num_points) {
 
   SparseMatrix<double> B;
   VectorXi FI;
-  igl::random_points_on_mesh(num_points, V_, newF, B, FI);
+  igl::random_points_on_mesh(_num_points, V_, newF, B, FI);
   P_ = B * V_;
+
+  if (_with_normals) {
+    igl::per_face_normals(V_, F_, FN_);
+    PN_ = Utils::slice_rows(FN_, FI);
+  }
 }
 
 void LibiglMesh::centerize_points(const std::string& _out_file) {
