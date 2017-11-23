@@ -13,6 +13,7 @@
 #include <igl/per_vertex_normals.h>
 #include <igl/png/writePNG.h>
 #include <utils/google_tools.h>
+#include <utils/glut_geometry.h>
 
 
 OSMesaMeshRenderer::OSMesaMeshRenderer(const int _width, const int _height)
@@ -196,10 +197,10 @@ void OSMesaMeshRenderer::render() {
   glLoadMatrixf(modelview_.data());
 
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-  // TODO(mhsung): Use lighting.
-  glEnable(GL_LIGHTING);
-  glShadeModel(GL_SMOOTH);
+
   //glDisable(GL_LIGHTING);
+  glShadeModel(GL_SMOOTH);
+  glEnable(GL_LIGHTING);
 
   render_point_set();
   render_mesh();
@@ -243,12 +244,14 @@ void OSMesaMeshRenderer::render_mesh() {
   glDisableClientState(GL_NORMAL_ARRAY);
 }
 
+/*
 void OSMesaMeshRenderer::render_point_set() {
   const bool has_point_color = (PC_.rows() == P_.rows());
 
   glEnableClientState(GL_VERTEX_ARRAY);
   glVertexPointer(3, GL_DOUBLE, 0, P_.data());
 
+  glPointSize(4.0);
   glBegin(GL_POINTS);
   for (int pid = 0; pid < P_.rows(); ++pid) {
     if (has_point_color) {
@@ -257,8 +260,36 @@ void OSMesaMeshRenderer::render_point_set() {
     } else {
       glColor4fv(igl::MAYA_GREY.data());
     }
+    glArrayElement(pid);
   }
   glEnd();
 
   glDisableClientState(GL_VERTEX_ARRAY);
 }
+*/
+
+void OSMesaMeshRenderer::render_point_set() {
+  const bool has_point_color = (PC_.rows() == P_.rows());
+  const double radius = 0.01;
+
+  for (int pid = 0; pid < P_.rows(); ++pid) {
+    if (has_point_color) {
+      const Vector3f color = PC_.row(pid);
+      //glColor3fv(color.data());
+      glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, color.data());
+      glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, color.data());
+      glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, color.data());
+    } else {
+      set_default_material();
+      //glColor4fv(igl::MAYA_GREY.data());
+    }
+
+    glPushMatrix();
+    glTranslated(P_(pid, 0), P_(pid, 1), P_(pid, 2));
+    glutSolidSphere(radius, 16, 16);
+    glPopMatrix();
+
+    glArrayElement(pid);
+  }
+}
+

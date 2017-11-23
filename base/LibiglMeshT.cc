@@ -35,7 +35,24 @@ DEFINE_string(out_point_set, "", "output point set file.");
 
 
 LibiglMeshT::LibiglMeshT()
-  : renderer_(nullptr) {
+  : renderer_(nullptr),
+    mesh_name_(""),
+    V_(MatrixXd(0, 3)),
+    F_(MatrixXi(0, 3)),
+    VC_(MatrixXf(0, 3)),
+    FC_(MatrixXf(0, 3)),
+    VL_(VectorXi(0, 3)),
+    FL_(VectorXi(0, 3)),
+    VN_(MatrixXd(0, 3)),
+    FN_(MatrixXd(0, 3)),
+    P_(MatrixXd(0, 3)),
+    PC_(MatrixXf(0, 3)),
+    PL_(VectorXi(0, 3)),
+    PN_(MatrixXd(0, 3)),
+    bb_min_(Vector3d::Zero()),
+    bb_max_(Vector3d::Zero()),
+    center_(Vector3d::Zero()),
+    radius_(1.0) {
 }
 
 LibiglMeshT::LibiglMeshT(LibiglMeshRendererT* _renderer)
@@ -47,8 +64,8 @@ bool LibiglMeshT::read_mesh(const std::string& _filename) {
     LOG(WARNING) << "Can't read the file: '" << _filename << "'";
     return false;
   }
-  mesh_name_ = filesystem::path(_filename).filename();
 
+  if (mesh_name_ == "" ) mesh_name_ = filesystem::path(_filename).filename();
   update_bounding_box();
 
   if (renderer_ == nullptr) {
@@ -74,13 +91,18 @@ bool LibiglMeshT::read_face_labels(const std::string& _filename) {
 
 bool LibiglMeshT::read_point_set(const std::string& _filename) {
   if (!Utils::read_eigen_matrix_from_file(_filename, &P_, ' ')) {
+    LOG(WARNING) << "Can't read the file: '" << _filename << "'";
     return false;
   }
+
+  if (mesh_name_ == "" ) mesh_name_ = filesystem::path(_filename).filename();
+  update_bounding_box();
 
   if (renderer_ == nullptr) {
     LOG(WARNING) << "Renderer is not set";
   } else {
     renderer_->set_points(P_);
+    renderer_->set_scene_pos(center_.cast<float>(), (float)radius_);
   }
 
   return true;
@@ -144,8 +166,12 @@ void LibiglMeshT::set_point_label_colors() {
 }
 
 void LibiglMeshT::update_bounding_box() {
-  bb_min_ = V_.colwise().minCoeff();
-  bb_max_ = V_.colwise().maxCoeff();
+  MatrixXd points = MatrixXd::Zero(V_.rows() + P_.rows(), 3);
+  if (points.rows() == 0) return;
+
+  points << V_, P_;
+  bb_min_ = points.colwise().minCoeff();
+  bb_max_ = points.colwise().maxCoeff();
   center_ = 0.5 * (bb_min_ + bb_max_);
   radius_ = 0.5 * (bb_max_ - bb_min_).norm();
 }
@@ -239,8 +265,8 @@ void LibiglMeshT::post_processing() {
   }
 
   // Compute normals.
-  igl::per_face_normals(V_, F_, FN_);
-  igl::per_vertex_normals(V_, F_, FN_, VN_);
+  //igl::per_face_normals(V_, F_, FN_);
+  //igl::per_vertex_normals(V_, F_, FN_, VN_);
 
 #ifdef USE_OSMESA
   renderer_->snapshot(FLAGS_snapshot);

@@ -126,6 +126,8 @@ if (NOT GLOG_FOUND)
 endif()
 include_directories(${GLOG_INCLUDE_DIRS})
 
+find_package(Threads REQUIRED)
+
 # Add project files
 add_executable(${PROJECT_NAME} ${SRC_FILES} ${RENDERER_FILES} ${LIBIGL_EXTRA_SOURCES})
 target_link_libraries(${PROJECT_NAME} ${LIBIGL_LIBRARIES} ${LIBIGL_EXTRA_LIBRARIES})
@@ -137,3 +139,9 @@ endif()
 target_link_libraries(${PROJECT_NAME} ${GFLAGS_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} ${GLOG_LIBRARIES})
 
+if(THREADS_HAVE_PTHREAD_ARG)
+  target_compile_options(${PROJECT_NAME} PUBLIC "-pthread")
+endif()
+if(CMAKE_THREAD_LIBS_INIT)
+  target_link_libraries(${PROJECT_NAME} "${CMAKE_THREAD_LIBS_INIT}")
+endif()
