@@ -142,7 +142,7 @@ void LibiglMesh::processing() {
 
   if (FLAGS_run_face_labeling) {
     //processing_subdivide_mesh();
-    processing_project_pts_labels_to_mesh(
+    processing_project_points_labels_to_mesh(
         FLAGS_out_face_labels);
   }
 

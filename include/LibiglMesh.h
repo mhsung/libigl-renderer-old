@@ -60,7 +60,7 @@ class LibiglMesh : public LibiglMeshT {
   protected:
     void processing_subdivide_mesh();
 
-    void processing_project_pts_labels_to_mesh(
+    void processing_project_points_labels_to_mesh(
         const std::string& _out_face_labels_file);
 
     void processing_disassemble_to_parts(

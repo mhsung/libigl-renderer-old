@@ -28,7 +28,7 @@
 
 
 // Last modified: 01-09-2017
-void LibiglMesh::processing_project_pts_labels_to_mesh(
+void LibiglMesh::processing_project_points_labels_to_mesh(
     const std::string& _out_face_labels_file) {
   const int num_points = P_.rows();
   const VectorXi label_set = Utils::unique(PL_);
