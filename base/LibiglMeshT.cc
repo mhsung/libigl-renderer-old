@@ -20,6 +20,7 @@ DEFINE_string(mesh, "", "mesh file.");
 DEFINE_string(face_labels, "", "face label file.");
 DEFINE_string(point_set, "", "point set file.");
 DEFINE_string(point_labels, "", "point label file.");
+DEFINE_string(point_values, "", "point value file.");
 DEFINE_double(azimuth_deg, 0.0, "azimuth (degree). "
     "ignored if 'modelview_matrix' is set");
 DEFINE_double(elevation_deg, 0.0, "elevation (degree). "
@@ -32,6 +33,7 @@ DEFINE_string(bbox, "", "bounding box file.");
 DEFINE_string(snapshot, "", "snapshot file.");
 DEFINE_string(out_mesh, "", "output mesh file.");
 DEFINE_string(out_point_set, "", "output point set file.");
+DEFINE_string(out_point_labels, "", "output point label file.");
 
 
 LibiglMeshT::LibiglMeshT()
@@ -114,7 +116,18 @@ bool LibiglMeshT::read_point_labels(const std::string& _filename) {
   }
 
   // Set point colors.
-  //set_point_label_colors();
+  set_point_label_colors();
+  return true;
+}
+
+bool LibiglMeshT::read_point_values(const std::string& _filename) {
+  VectorXf PV;
+  if (!Utils::read_eigen_matrix_from_file(_filename, &PV)) {
+    return false;
+  }
+
+  // Set point colors.
+  set_point_value_colors(PV);
   return true;
 }
 
@@ -156,6 +169,50 @@ void LibiglMeshT::set_point_label_colors() {
     Vector3f color;
     Utils::random_label_rgb_color(PL_(pid), &color);
     PC_.row(pid) = color.transpose();
+  }
+
+  if (renderer_ == nullptr) {
+    LOG(WARNING) << "Renderer is not set";
+  } else {
+    renderer_->set_point_colors(PC_);
+  }
+}
+
+void LibiglMeshT::set_point_value_colors(const VectorXf& _PV) {
+  if (_PV.size() != P_.rows()) {
+    LOG(WARNING) << "Number of point values does not match number of points.";
+    return;
+  }
+
+  PC_ = MatrixXf(n_points(), 3);
+  PC_.setZero();
+
+  const float vmin = _PV.minCoeff();
+  const float vmax = _PV.maxCoeff();
+  const float dv = vmax - vmin;
+
+  if (dv > 1.0e-8) {
+    for (int pid = 0; pid < n_points(); ++pid) {
+      Vector3f color = Vector3f::Ones();
+      const float v = _PV[pid];
+
+      // https://stackoverflow.com/questions/7706339/grayscale-to-red-green-blue-matlab-jet-color-scale
+      if (v < (vmin + 0.25f * dv)) {
+        color[0] = 0.0f;
+        color[1] = 4.0f * (v - vmin) / dv;
+      } else if (v < (vmin + 0.5f * dv)) {
+        color[0] = 0.0f;
+        color[2] = 1.0f + 4.0f * (vmin + 0.25f * dv - v) / dv;
+      } else if (v < (vmin + 0.75f * dv)) {
+        color[0] = 4.0f * (v - vmin - 0.5f * dv) / dv;
+        color[2] = 0.0f;
+      } else {
+        color[1] = 1.0f + 4.0f * (vmin + 0.75f * dv - v) / dv;
+        color[2] = 0.0f;
+      }
+
+      PC_.row(pid) = color.transpose();
+    }
   }
 
   if (renderer_ == nullptr) {
@@ -207,6 +264,12 @@ void LibiglMeshT::pre_processing() {
 
   if (FLAGS_point_labels != "") {
     if (!read_point_labels(FLAGS_point_labels)) {
+      return;
+    }
+  }
+
+  if (FLAGS_point_values != "") {
+    if (!read_point_values(FLAGS_point_values)) {
       return;
     }
   }
@@ -262,6 +325,11 @@ void LibiglMeshT::post_processing() {
     } else {
       Utils::write_eigen_matrix_to_file(FLAGS_out_point_set, P_, ' ');
     }
+  }
+
+  if (FLAGS_out_point_labels != "") {
+    CHECK_EQ(PL_.rows(), P_.rows());
+    Utils::write_eigen_matrix_to_file(FLAGS_out_point_labels, PL_, ' ');
   }
 
   // Compute normals.

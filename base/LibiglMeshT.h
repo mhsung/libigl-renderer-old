@@ -28,6 +28,7 @@ DECLARE_string(modelview_matrix);
 DECLARE_string(snapshot);
 DECLARE_string(out_mesh);
 DECLARE_string(out_point_set);
+DECLARE_string(out_point_labels);
 
 
 class LibiglMeshT {
@@ -49,7 +50,9 @@ class LibiglMeshT {
     void set_face_label_colors();
 
     bool read_point_labels(const std::string& _filename);
+    bool read_point_values(const std::string& _filename);
     void set_point_label_colors();
+    void set_point_value_colors(const VectorXf& _PV);
 
     void update_bounding_box();
     bool write_bounding_box(const std::string& _filename);

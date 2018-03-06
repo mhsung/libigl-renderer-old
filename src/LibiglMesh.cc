@@ -22,6 +22,7 @@ DEFINE_string(inverse_transformation, "", "(rx, ry, rz, tx, ty, tz)");
 DEFINE_bool(sample_points, false, "");
 DEFINE_bool(with_normals, false, "");
 DEFINE_int32(num_sample_points, 1024, "");
+DEFINE_bool(normalize_point_set, false, "");
 DEFINE_bool(centerize_point_set, false, "");
 DEFINE_string(out_point_set_center, "", "");
 DEFINE_bool(pca_align_point_set, false, "");
@@ -60,9 +61,10 @@ DEFINE_bool(find_symmetric_components, false, "");
 // Barycenter-based mesh coloring params.
 DEFINE_string(coloring_reference_mesh, "", "");
 
+/*
 // Contacting point labeling params.
-DEFINE_string(out_point_labels, "", "output point label file.");
 DEFINE_double(max_contacting_squared_distance, 0.005 * 0.005, "");
+*/
 
 
 void LibiglMesh::mesh_processing() {
@@ -121,6 +123,10 @@ void LibiglMesh::point_set_processing() {
     sample_points_on_mesh(FLAGS_num_sample_points, FLAGS_with_normals);
   }
 
+  if (FLAGS_normalize_point_set) {
+    normalize_points();
+  }
+
   if (FLAGS_centerize_point_set) {
     centerize_points(FLAGS_out_point_set_center);
   }
@@ -158,9 +164,11 @@ void LibiglMesh::processing() {
   else if (FLAGS_run_barycenter_coloring) {
     processing_color_barycenter(FLAGS_coloring_reference_mesh);
   }
+  /*
   else if (FLAGS_run_contacting_point_labeling) {
     processing_label_contacting_points(
         FLAGS_out_point_labels,
         FLAGS_max_contacting_squared_distance);
   }
+  */
 }

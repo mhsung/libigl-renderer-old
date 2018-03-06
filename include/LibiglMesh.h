@@ -49,6 +49,8 @@ class LibiglMesh : public LibiglMeshT {
 
     void sample_points_on_mesh(const int _num_points, const bool _with_normals);
 
+    void normalize_points();
+
     void centerize_points(const std::string& _out_file = "");
 
     void pca_align_points(const std::string& _out_file = "");

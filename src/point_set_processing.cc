@@ -24,14 +24,31 @@ void LibiglMesh::sample_points_on_mesh(
   igl::remove_duplicate_faces_custom(F_, newF);
 
   SparseMatrix<double> B;
-  VectorXi FI;
-  igl::random_points_on_mesh(_num_points, V_, newF, B, FI);
+  // NOTE: 02-25-2018
+  // Assign face indices to points labels.
+  igl::random_points_on_mesh(_num_points, V_, newF, B, PL_);
+  const VectorXi& FI = PL_;
   P_ = B * V_;
 
   if (_with_normals) {
     igl::per_face_normals(V_, F_, FN_);
     PN_ = Utils::slice_rows(FN_, FI);
   }
+}
+
+void LibiglMesh::normalize_points() {
+  const int num_samples = P_.rows();
+  CHECK_GT(num_samples, 0);
+
+  // Compute center and bounding box diagonal.
+  const auto bb_min = P_.colwise().minCoeff();
+  const auto bb_max = P_.colwise().maxCoeff();
+
+  const RowVector3d bb_center = 0.5 * (bb_min + bb_max);
+  P_ = P_.rowwise() - bb_center;
+
+  const auto radius = P_.rowwise().norm().maxCoeff();
+  P_ = P_ / radius;
 }
 
 void LibiglMesh::centerize_points(const std::string& _out_file) {

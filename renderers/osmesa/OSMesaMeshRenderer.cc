@@ -72,7 +72,7 @@ void OSMesaMeshRenderer::set_points(const Eigen::MatrixXd& _P) {
 
 void OSMesaMeshRenderer::set_point_colors(const Eigen::MatrixXf& _PC) {
   CHECK_EQ(_PC.cols(), 3);
-  FC_.resize(_PC.rows(), 3);
+  PC_.resize(_PC.rows(), 3);
   for (int i = 0 ; i < _PC.rows(); ++i) PC_.row(i) = _PC.row(i);
 }
 
@@ -274,8 +274,11 @@ void OSMesaMeshRenderer::render_point_set() {
 
   for (int pid = 0; pid < P_.rows(); ++pid) {
     if (has_point_color) {
-      const Vector3f color = PC_.row(pid);
+      //const Vector3f color = PC_.row(pid);
       //glColor3fv(color.data());
+      Vector4f color;
+      for (int i = 0; i < 3; ++i) color[i] = PC_.row(pid)[i];
+      color[3] = 1.0f;
       glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, color.data());
       glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, color.data());
       glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, color.data());
