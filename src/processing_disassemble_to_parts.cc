@@ -74,7 +74,8 @@ void LibiglMesh::processing_disassemble_to_parts(
     igl::remove_small_components(label_V, label_F);
 
     std::stringstream label_sstr;
-    label_sstr << std::setw(num_digits) << std::setfill('0') << label;
+    //label_sstr << std::setw(num_digits) << std::setfill('0') << label;
+    label_sstr << label;
 
     // Write unnormalized part mesh.
     if (_out_part_mesh_unnormalized_dir != "") {

@@ -51,7 +51,8 @@ class LibiglMesh : public LibiglMeshT {
 
     void normalize_points();
 
-    void centerize_points(const std::string& _out_file = "");
+    void compute_point_set_center_and_area(
+        const std::string& _out_file, bool _centerize);
 
     void pca_align_points(const std::string& _out_file = "");
 
@@ -61,6 +62,10 @@ class LibiglMesh : public LibiglMeshT {
     void processing_subdivide_mesh();
 
     void processing_project_points_labels_to_mesh(
+        const std::string& _out_face_labels_file);
+
+    void processing_MRF_with_point_label_probs(
+        const std::string& _in_point_label_probs_file,
         const std::string& _out_face_labels_file);
 
     void processing_disassemble_to_parts(

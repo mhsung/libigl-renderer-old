@@ -51,7 +51,8 @@ void LibiglMesh::normalize_points() {
   P_ = P_ / radius;
 }
 
-void LibiglMesh::centerize_points(const std::string& _out_file) {
+void LibiglMesh::compute_point_set_center_and_area(
+    const std::string& _out_file, bool _centerize) {
   const int num_samples = P_.rows();
   CHECK_GT(num_samples, 0);
 
@@ -74,8 +75,10 @@ void LibiglMesh::centerize_points(const std::string& _out_file) {
   igl::doublearea(V_, newF, FA);
   const double sum_face_areas = 0.5 * FA.sum();
 
-  // Centerize point set.
-  P_ = P_.rowwise() - bb_center;
+  if (_centerize) {
+    // Centerize point set.
+    P_ = P_.rowwise() - bb_center;
+  }
 
   if (_out_file != "") {
     RowVector4d center_and_area;

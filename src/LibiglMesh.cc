@@ -6,6 +6,7 @@
 //
 
 #include "LibiglMesh.h"
+#include <Eigen/Geometry>
 #include <utils/utils.h>
 
 
@@ -15,8 +16,10 @@ DEFINE_bool(flip_x, false, "");
 DEFINE_bool(flip_y, false, "");
 DEFINE_bool(flip_z, false, "");
 DEFINE_string(translation, "", "(tx, ty, tz)");
+DEFINE_string(rotation, "", "(rx, ry, rz)");
 DEFINE_string(transformation, "", "(rx, ry, rz, tx, ty, tz)");
 DEFINE_string(inverse_transformation, "", "(rx, ry, rz, tx, ty, tz)");
+DEFINE_bool(normalize_height, false, "");
 
 // Point set processing.
 DEFINE_bool(sample_points, false, "");
@@ -37,6 +40,7 @@ DEFINE_bool(run_barycenter_coloring, false, "");
 DEFINE_bool(run_contacting_point_labeling, false, "");
 
 // Face labeling params.
+DEFINE_string(in_point_label_probs, "", "Input label probabilities per point.");
 DEFINE_string(out_face_labels, "", "output face label file.");
 
 // Part disassembly params.
@@ -90,6 +94,20 @@ void LibiglMesh::mesh_processing() {
     mesh_modified = true;
   }
 
+  if (FLAGS_rotation != "") {
+    std::vector<std::string> strs = Utils::split_string(FLAGS_rotation);
+    CHECK_EQ(strs.size(), 3);
+    Matrix3d R = Matrix3d::Identity();
+    for (int i = 0; i < 3; ++i) {
+      const double angle = std::stod(strs[i]) / 180.0 * M_PI;
+      const AngleAxisd axis_R(angle, Vector3d::Unit(i));
+      R = axis_R.toRotationMatrix() * R;
+    }
+    const Eigen::Matrix<double, Dynamic, 3>& V_temp = V_;
+    V_ = (R * V_temp.transpose()).transpose();
+    mesh_modified = true;
+  }
+
   if (FLAGS_transformation != "") {
     std::vector<std::string> strs = Utils::split_string(FLAGS_transformation);
     CHECK_EQ(strs.size(), 6);
@@ -111,6 +129,12 @@ void LibiglMesh::mesh_processing() {
     mesh_modified = true;
   }
 
+  if (FLAGS_normalize_height) {
+    const double height = V_.col(1).maxCoeff() - V_.col(1).minCoeff();
+    CHECK_GT(height, 1.0E-6);
+    V_ /= height;
+  }
+
   if (mesh_modified) {
     update_bounding_box();
     renderer_->set_mesh(V_, F_);
@@ -127,8 +151,10 @@ void LibiglMesh::point_set_processing() {
     normalize_points();
   }
 
-  if (FLAGS_centerize_point_set) {
-    centerize_points(FLAGS_out_point_set_center);
+  if (FLAGS_centerize_point_set ||
+      FLAGS_out_point_set_center != "") {
+    compute_point_set_center_and_area(
+        FLAGS_out_point_set_center, FLAGS_centerize_point_set);
   }
 
   if (FLAGS_pca_align_point_set) {
@@ -141,9 +167,10 @@ void LibiglMesh::processing() {
   point_set_processing();
 
   if (FLAGS_run_face_labeling) {
-    //processing_subdivide_mesh();
-    processing_project_points_labels_to_mesh(
-        FLAGS_out_face_labels);
+    //processing_project_points_labels_to_mesh(
+    //    FLAGS_out_face_labels);
+    processing_MRF_with_point_label_probs(
+        FLAGS_in_point_label_probs, FLAGS_out_face_labels);
   }
 
   if (FLAGS_run_part_disassembly) {

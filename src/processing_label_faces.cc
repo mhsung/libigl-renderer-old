@@ -16,6 +16,7 @@
 #include <igl/read_triangle_mesh.h>
 #include <igl/remove_unreferenced.h>
 #include <igl/per_face_normals.h>
+#include <igl/point_mesh_squared_distance.h>
 #include <igl/write_triangle_mesh.h>
 #include <modules/consistent_face_flippping.h>
 #include <modules/edge_lengths_simple.h>
@@ -134,6 +135,110 @@ void LibiglMesh::processing_project_points_labels_to_mesh(
       CRFUnary, CRFBinary, MRFEigen::BP, kMaxMRFIters);
   FL_ = Utils::slice_rows(label_set, face_label_idxs);
 
+  set_face_label_colors();
+
+  if (_out_face_labels_file != "") {
+    write_face_labels(_out_face_labels_file);
+  }
+}
+
+
+void LibiglMesh::processing_MRF_with_point_label_probs(
+        const std::string& _in_point_label_probs_file,
+        const std::string& _out_face_labels_file) {
+  const int num_points = P_.rows();
+  MatrixXd P_unary_probs;
+  if (!Utils::read_eigen_matrix_from_file(
+        _in_point_label_probs_file, &P_unary_probs, ' ')) {
+    LOG(ERROR) << "Can't read the file: '" <<
+      _in_point_label_probs_file << "'";
+    return;
+  }
+  CHECK_EQ(P_unary_probs.rows(), num_points);
+  const int num_labels = P_unary_probs.cols();
+
+  MatrixXd F_unary_probs = MatrixXd::Zero(n_faces(), num_labels);
+  for (int fid = 0; fid < n_faces(); ++fid) {
+    VectorXd sqrD;
+    VectorXi I;
+    MatrixXd C;
+    igl::point_mesh_squared_distance(P_, V_, F_.row(fid), sqrD, I, C);
+    const double kSquaredTol = std::pow(0.005, 2);
+
+    int count = 0;
+    for (int pid = 0; pid < num_points; ++pid) {
+      if (sqrD[pid] < kSquaredTol) {
+        F_unary_probs.row(fid) += P_unary_probs.row(pid);
+        ++count;
+      }
+    }
+    if (count > 0) F_unary_probs.row(fid) /= double(count);
+  }
+
+  // Set minimum probability.
+  const double kMinProb = 1.0e-6;
+  F_unary_probs = F_unary_probs.cwiseMax(kMinProb);
+
+  // Compute unary penalties.
+  MatrixXd CRFUnary = -F_unary_probs.array().log();
+
+  // Weight based on face areas.
+  VectorXd FA;
+  igl::doublearea(V_, F_, FA);
+  const VectorXd FA_normalized = FA.normalized();
+  for (int fid = 0; fid < n_faces(); ++fid) {
+    CRFUnary.row(fid) *= FA_normalized[fid];
+  }
+
+  // Compute binary penalties.
+  igl::per_face_normals(V_, F_, FN_);
+  const double kBinaryWeight = 1.0;
+  const double kAngleWeight = 5.0;
+  const double kMaxAngle = M_PI / 2.0;
+
+  MatrixXi EV;
+  MatrixXi FE;
+  std::vector<std::list<int> > EF;
+  igl::edge_topology_non_manifold(F_, EV, FE, EF);
+  std::vector<Eigen::Triplet<double> > edge_coeffs;
+
+  for (int eid = 0; eid < EF.size(); ++eid) {
+    for (const int fid1 : EF[eid]) {
+      for (const int fid2 : EF[eid]) {
+        if (fid1 < fid2) {
+          const auto cos_angle = FN_.row(fid1).dot(FN_.row(fid2));
+          const auto angle = std::acos(
+              std::min(std::max(cos_angle, -1.0), +1.0));
+          const auto normalized_angle = std::min(angle, kMaxAngle) / kMaxAngle;
+          const auto penalty = kBinaryWeight *
+            std::exp(-kAngleWeight * normalized_angle);
+          edge_coeffs.emplace_back(fid1, fid2, penalty);
+        }
+      }
+    }
+  }
+
+  // Compute CRF binary terms.
+  SparseMatrix<double> CRFBinary(n_faces(), n_faces());
+  CRFBinary.setFromTriplets(edge_coeffs.begin(), edge_coeffs.end());
+
+  // Run MRF solver and set face labels.
+  const int kMaxMRFIters = 100;
+  FL_ = MRFEigen::solve_mrf_potts(
+      CRFUnary, CRFBinary, MRFEigen::TRW_S, kMaxMRFIters);
+
+  /*
+  FL_ = Eigen::VectorXi::Zero(n_faces());
+  for(int fid = 0; fid < n_faces(); ++fid) {
+    F_unary_probs.row(fid).maxCoeff(&FL_[fid]);
+  }
+  */
+
+  // NOTE:
+  // Do not render points.
+  renderer_->set_points(Eigen::MatrixXd::Zero(0, 3));
+
+  FL_ = FL_.array() + 1;
   set_face_label_colors();
 
   if (_out_face_labels_file != "") {
