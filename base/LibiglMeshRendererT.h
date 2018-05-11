@@ -38,6 +38,7 @@ class LibiglMeshRendererT {
 
     virtual void set_mesh(
         const Eigen::MatrixXd& _V, const Eigen::MatrixXi& _F) = 0;
+    virtual void set_vertex_colors(const Eigen::MatrixXf& _VC) = 0;
     virtual void set_face_colors(const Eigen::MatrixXf& _FC) = 0;
 
     virtual void set_points(const Eigen::MatrixXd& _P) = 0;

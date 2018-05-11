@@ -34,6 +34,7 @@ class OSMesaMeshRenderer : public LibiglMeshRendererT {
 
     virtual void set_mesh(
         const Eigen::MatrixXd& _V, const Eigen::MatrixXi& _F);
+    virtual void set_vertex_colors(const Eigen::MatrixXf& _VC);
     virtual void set_face_colors(const Eigen::MatrixXf& _FC);
 
     virtual void set_points(const Eigen::MatrixXd& _P);
@@ -60,6 +61,7 @@ class OSMesaMeshRenderer : public LibiglMeshRendererT {
     Matrix<int, Dynamic, 3, RowMajor> F_;
     Matrix<double, Dynamic, 3, RowMajor> VN_;
     Matrix<double, Dynamic, 3, RowMajor> FN_;
+    Matrix<float, Dynamic, 3, RowMajor> VC_;
     Matrix<float, Dynamic, 3, RowMajor> FC_;
 
     // Point set.

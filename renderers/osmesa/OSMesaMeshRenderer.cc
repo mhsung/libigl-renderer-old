@@ -58,6 +58,12 @@ void OSMesaMeshRenderer::set_mesh(
   igl::per_vertex_normals(V_, F_, FN_, VN_);
 }
 
+void OSMesaMeshRenderer::set_vertex_colors(const Eigen::MatrixXf& _VC) {
+  CHECK_EQ(_VC.cols(), 3);
+  VC_.resize(_VC.rows(), 3);
+  for (int i = 0 ; i < _VC.rows(); ++i) VC_.row(i) = _VC.row(i);
+}
+
 void OSMesaMeshRenderer::set_face_colors(const Eigen::MatrixXf& _FC) {
   CHECK_EQ(_FC.cols(), 3);
   FC_.resize(_FC.rows(), 3);
@@ -209,7 +215,12 @@ void OSMesaMeshRenderer::render() {
 }
 
 void OSMesaMeshRenderer::render_mesh() {
+  const bool has_vertex_color = (VC_.rows() == V_.rows());
   const bool has_face_color = (FC_.rows() == F_.rows());
+
+  if (has_vertex_color && has_face_color) {
+    LOG(ERROR) << "Both vertices and faces have colors.";
+  }
 
   glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
 
@@ -222,19 +233,20 @@ void OSMesaMeshRenderer::render_mesh() {
   glBegin(GL_TRIANGLES);
   for (int fid = 0; fid < F_.rows(); ++fid) {
     if (has_face_color) {
-      //const Vector3f color = FC_.row(fid);
-      //glColor3fv(color.data());
       const Vector4f color(FC_(fid, 0), FC_(fid, 1), FC_(fid, 2), 1.0f);
       glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, color.data());
       glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, color.data());
       glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, color.data());
-    } else {
-      set_default_material();
-      //glColor4fv(igl::MAYA_GREY.data());
     }
 
     for (int i = 0; i < 3; ++i) {
       const int vid = F_(fid, i);
+      if (has_vertex_color) {
+        const Vector4f color(VC_(vid, 0), VC_(vid, 1), VC_(vid, 2), 1.0f);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, color.data());
+        glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, color.data());
+        glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, color.data());
+      }
       glArrayElement(vid);
     }
   }

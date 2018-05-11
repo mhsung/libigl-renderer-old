@@ -17,6 +17,7 @@
 
 // Define input variables.
 DEFINE_string(mesh, "", "mesh file.");
+DEFINE_string(vertex_values, "", "vertex value file.");
 DEFINE_string(face_labels, "", "face label file.");
 DEFINE_string(point_set, "", "point set file.");
 DEFINE_string(point_labels, "", "point label file.");
@@ -80,6 +81,28 @@ bool LibiglMeshT::read_mesh(const std::string& _filename) {
   return true;
 }
 
+bool LibiglMeshT::read_vertex_values(const std::string& _filename) {
+  VectorXf VV;
+  if (!Utils::read_eigen_matrix_from_file(_filename, &VV)) {
+    return false;
+  }
+
+  if (VV.size() != V_.rows()) {
+    LOG(WARNING) << "Number of vertex values does not match number of vertices.";
+    return false;
+  }
+
+  VC_ = compute_color_map(VV);
+
+  if (renderer_ == nullptr) {
+    LOG(WARNING) << "Renderer is not set";
+  } else {
+    renderer_->set_vertex_colors(VC_);
+  }
+
+  return true;
+}
+
 bool LibiglMeshT::read_face_labels(const std::string& _filename) {
   FL_ = VectorXi(n_faces());
   if (!Utils::read_eigen_matrix_from_file(_filename, &FL_)) {
@@ -126,8 +149,19 @@ bool LibiglMeshT::read_point_values(const std::string& _filename) {
     return false;
   }
 
-  // Set point colors.
-  set_point_value_colors(PV);
+  if (PV.size() != P_.rows()) {
+    LOG(WARNING) << "Number of point values does not match number of points.";
+    return false;
+  }
+
+  PC_ = compute_color_map(PV);
+
+  if (renderer_ == nullptr) {
+    LOG(WARNING) << "Renderer is not set";
+  } else {
+    renderer_->set_point_colors(PC_);
+  }
+
   return true;
 }
 
@@ -178,23 +212,18 @@ void LibiglMeshT::set_point_label_colors() {
   }
 }
 
-void LibiglMeshT::set_point_value_colors(const VectorXf& _PV) {
-  if (_PV.size() != P_.rows()) {
-    LOG(WARNING) << "Number of point values does not match number of points.";
-    return;
-  }
+MatrixXf LibiglMeshT::compute_color_map(const VectorXf& _values) {
+  MatrixXf colors = MatrixXf(_values.size(), 3);
+  colors.setZero();
 
-  PC_ = MatrixXf(n_points(), 3);
-  PC_.setZero();
-
-  const float vmin = _PV.minCoeff();
-  const float vmax = _PV.maxCoeff();
+  const float vmin = _values.minCoeff();
+  const float vmax = _values.maxCoeff();
   const float dv = vmax - vmin;
 
   if (dv > 1.0e-8) {
     for (int pid = 0; pid < n_points(); ++pid) {
       Vector3f color = Vector3f::Ones();
-      const float v = _PV[pid];
+      const float v = _values[pid];
 
       // https://stackoverflow.com/questions/7706339/grayscale-to-red-green-blue-matlab-jet-color-scale
       if (v < (vmin + 0.25f * dv)) {
@@ -211,15 +240,11 @@ void LibiglMeshT::set_point_value_colors(const VectorXf& _PV) {
         color[2] = 0.0f;
       }
 
-      PC_.row(pid) = color.transpose();
+      colors.row(pid) = color.transpose();
     }
   }
 
-  if (renderer_ == nullptr) {
-    LOG(WARNING) << "Renderer is not set";
-  } else {
-    renderer_->set_point_colors(PC_);
-  }
+  return colors;
 }
 
 void LibiglMeshT::update_bounding_box() {
@@ -246,6 +271,12 @@ bool LibiglMeshT::write_bounding_box(const std::string& _filename) {
 void LibiglMeshT::pre_processing() {
   if (FLAGS_mesh != "") {
     if (!read_mesh(FLAGS_mesh)) {
+      return;
+    }
+  }
+
+  if (FLAGS_vertex_values != "") {
+    if (!read_vertex_values(FLAGS_vertex_values)) {
       return;
     }
   }

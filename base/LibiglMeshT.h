@@ -17,9 +17,11 @@ using namespace Eigen;
 
 // Declare input variables.
 DECLARE_string(mesh);
+DECLARE_string(vertex_values);
 DECLARE_string(face_labels);
 DECLARE_string(point_set);
 DECLARE_string(point_labels);
+DECLARE_string(point_values);
 DECLARE_double(azimuth_deg);
 DECLARE_double(elevation_deg);
 DECLARE_double(theta_deg);
@@ -45,6 +47,7 @@ class LibiglMeshT {
     bool read_mesh(const std::string& _filename);
     bool read_point_set(const std::string& _filename);
 
+    bool read_vertex_values(const std::string& _filename);
     bool read_face_labels(const std::string& _filename);
     bool write_face_labels(const std::string& _filename);
     void set_face_label_colors();
@@ -52,7 +55,8 @@ class LibiglMeshT {
     bool read_point_labels(const std::string& _filename);
     bool read_point_values(const std::string& _filename);
     void set_point_label_colors();
-    void set_point_value_colors(const VectorXf& _PV);
+
+    MatrixXf compute_color_map(const VectorXf& _values);
 
     void update_bounding_box();
     bool write_bounding_box(const std::string& _filename);
