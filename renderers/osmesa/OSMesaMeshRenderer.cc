@@ -82,6 +82,18 @@ void OSMesaMeshRenderer::set_point_colors(const Eigen::MatrixXf& _PC) {
   for (int i = 0 ; i < _PC.rows(); ++i) PC_.row(i) = _PC.row(i);
 }
 
+void OSMesaMeshRenderer::set_keypoints(const Eigen::MatrixXd& _key_P) {
+  CHECK_EQ(_key_P.cols(), 3);
+  key_P_.resize(_key_P.rows(), 3);
+  for (int i = 0 ; i < _key_P.rows(); ++i) key_P_.row(i) = _key_P.row(i);
+}
+
+void OSMesaMeshRenderer::set_keypoint_colors(const Eigen::MatrixXf& _key_PC) {
+  CHECK_EQ(_key_PC.cols(), 3);
+  key_PC_.resize(_key_PC.rows(), 3);
+  for (int i = 0 ; i < _key_PC.rows(); ++i) key_PC_.row(i) = _key_PC.row(i);
+}
+
 void OSMesaMeshRenderer::run_loop() {
 }
 
@@ -209,6 +221,7 @@ void OSMesaMeshRenderer::render() {
   glEnable(GL_LIGHTING);
 
   render_point_set();
+  render_keypoints();
   render_mesh();
 
   set_default_material();
@@ -296,15 +309,41 @@ void OSMesaMeshRenderer::render_point_set() {
       glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, color.data());
     } else {
       set_default_material();
-      //glColor4fv(igl::MAYA_GREY.data());
     }
 
     glPushMatrix();
     glTranslated(P_(pid, 0), P_(pid, 1), P_(pid, 2));
     glutSolidSphere(radius, 16, 16);
     glPopMatrix();
-
-    glArrayElement(pid);
   }
+
+  set_default_material();
+}
+
+void OSMesaMeshRenderer::render_keypoints() {
+  const bool has_keypoint_color = (key_PC_.rows() == key_P_.rows());
+  const double radius = 0.04;
+
+  for (int pid = 0; pid < key_P_.rows(); ++pid) {
+    if (has_keypoint_color) {
+      //const Vector3f color = key_PC_.row(pid);
+      //glColor3fv(color.data());
+      Vector4f color;
+      for (int i = 0; i < 3; ++i) color[i] = key_PC_.row(pid)[i];
+      color[3] = 1.0f;
+      glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, color.data());
+      glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, color.data());
+      glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, color.data());
+    } else {
+      set_default_material();
+    }
+
+    glPushMatrix();
+    glTranslated(key_P_(pid, 0), key_P_(pid, 1), key_P_(pid, 2));
+    glutSolidSphere(radius, 16, 16);
+    glPopMatrix();
+  }
+
+  set_default_material();
 }
 

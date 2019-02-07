@@ -14,7 +14,8 @@
 #include <utils/utils.h>
 
 
-const float kTranslationDistance = 2.4f;
+//const float kTranslationDistance = 2.4f;
+const float kTranslationDistance = 3.0f;
 
 LibiglMeshRendererT::LibiglMeshRendererT(const int _width, const int _height)
   : width_(_width),

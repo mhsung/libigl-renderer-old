@@ -17,11 +17,14 @@ using namespace Eigen;
 
 // Declare input variables.
 DECLARE_string(mesh);
+DECLARE_string(vertex_labels);
 DECLARE_string(vertex_values);
 DECLARE_string(face_labels);
 DECLARE_string(point_set);
 DECLARE_string(point_labels);
 DECLARE_string(point_values);
+DECLARE_string(keypoints);
+DECLARE_string(keypoint_labels);
 DECLARE_double(azimuth_deg);
 DECLARE_double(elevation_deg);
 DECLARE_double(theta_deg);
@@ -47,7 +50,10 @@ class LibiglMeshT {
     bool read_mesh(const std::string& _filename);
     bool read_point_set(const std::string& _filename);
 
+    bool read_vertex_labels(const std::string& _filename);
     bool read_vertex_values(const std::string& _filename);
+    void set_vertex_label_colors();
+
     bool read_face_labels(const std::string& _filename);
     bool write_face_labels(const std::string& _filename);
     void set_face_label_colors();
@@ -55,6 +61,9 @@ class LibiglMeshT {
     bool read_point_labels(const std::string& _filename);
     bool read_point_values(const std::string& _filename);
     void set_point_label_colors();
+
+    bool read_keypoints(const std::string& _str);
+    bool read_keypoint_labels(const std::string& _str);
 
     MatrixXf compute_color_map(const VectorXf& _values);
 
@@ -93,6 +102,10 @@ class LibiglMeshT {
     Vector3d bb_max_;
     Vector3d center_;
     double radius_;
+
+    MatrixXd KP_;
+    MatrixXf KPC_;
+    VectorXi KPL_;
 
     // Rendering properties.
     LibiglMeshRendererT* renderer_;

@@ -19,8 +19,8 @@
 int main(int argc, char *argv[]) {
   google::ParseCommandLineFlags(&argc, &argv, true);
 
-  const int kWidth = 640;
-  const int kHeight = 480;
+  const int kWidth = 800;
+  const int kHeight = 600;
   //const int kWidth = 1920;
   //const int kHeight = 1080;
 

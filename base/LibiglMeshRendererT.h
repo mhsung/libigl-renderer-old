@@ -9,6 +9,7 @@
 #define LIBIGL_MESH_RENDERER_T_H
 
 #include <string>
+#include <vector>
 #include <Eigen/Core>
 
 using namespace Eigen;
@@ -43,6 +44,9 @@ class LibiglMeshRendererT {
 
     virtual void set_points(const Eigen::MatrixXd& _P) = 0;
     virtual void set_point_colors(const Eigen::MatrixXf& _PC) = 0;
+
+    virtual void set_keypoints(const Eigen::MatrixXd& _key_P) = 0;
+    virtual void set_keypoint_colors(const Eigen::MatrixXf& _key_PC) = 0;
 
     virtual void run_loop() = 0;
     virtual bool snapshot(const std::string& _filename) = 0;

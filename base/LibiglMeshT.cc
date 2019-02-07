@@ -18,10 +18,13 @@
 // Define input variables.
 DEFINE_string(mesh, "", "mesh file.");
 DEFINE_string(vertex_values, "", "vertex value file.");
+DEFINE_string(vertex_labels, "", "vertex label file.");
 DEFINE_string(face_labels, "", "face label file.");
 DEFINE_string(point_set, "", "point set file.");
 DEFINE_string(point_labels, "", "point label file.");
 DEFINE_string(point_values, "", "point value file.");
+DEFINE_string(keypoints, "", "keypoint coordinates.");
+DEFINE_string(keypoint_labels, "", "keypoint labels.");
 DEFINE_double(azimuth_deg, 0.0, "azimuth (degree). "
     "ignored if 'modelview_matrix' is set");
 DEFINE_double(elevation_deg, 0.0, "elevation (degree). "
@@ -78,6 +81,16 @@ bool LibiglMeshT::read_mesh(const std::string& _filename) {
     renderer_->set_scene_pos(center_.cast<float>(), (float)radius_);
   }
 
+  return true;
+}
+
+bool LibiglMeshT::read_vertex_labels(const std::string& _filename) {
+  if (!Utils::read_eigen_matrix_from_file(_filename, &VL_)) {
+    return false;
+  }
+
+  // Set vertex colors.
+  set_vertex_label_colors();
   return true;
 }
 
@@ -165,6 +178,69 @@ bool LibiglMeshT::read_point_values(const std::string& _filename) {
   return true;
 }
 
+bool LibiglMeshT::read_keypoints(const std::string& _str) {
+  /*
+  MatrixXd KP_;
+  if (!Utils::read_eigen_matrix_from_file(_filename, &KP_, ' ')) {
+    LOG(WARNING) << "Can't read the file: '" << _filename << "'";
+    return false;
+  }
+  */
+  std::vector<std::string> strs = Utils::split_string(_str);
+  const int n_keypoints = int(strs.size()) / 3;
+  CHECK_EQ(3 * n_keypoints, strs.size());
+
+  KP_ = MatrixXd::Zero(n_keypoints, 3);
+  for (int i = 0; i < n_keypoints; ++i) {
+    for (int j = 0; j < 3; ++j) {
+      KP_(i, j) = std::stod(strs[3*i+j]);
+    }
+  }
+
+  KPC_ = MatrixXf(n_keypoints, 3);
+  for (int i = 0; i < n_keypoints; ++i) {
+    Vector3f color;
+    Utils::random_label_rgb_color(i + 1, &color);
+    KPC_.row(i) = color.transpose();
+  }
+
+  if (renderer_ == nullptr) {
+    LOG(WARNING) << "Renderer is not set";
+  } else {
+    renderer_->set_keypoints(KP_);
+    renderer_->set_keypoint_colors(KPC_);
+  }
+
+  return true;
+}
+
+bool LibiglMeshT::read_keypoint_labels(const std::string& _str) {
+  std::vector<std::string> strs = Utils::split_string(_str);
+  const int n_keypoints = KP_.rows();
+  CHECK_EQ(strs.size(), n_keypoints);
+
+  KPL_ = VectorXi::Zero(n_keypoints);
+  for (int i = 0; i < n_keypoints; ++i) {
+    KPL_(i) = std::stoi(strs[i]);
+  }
+
+  KPC_ = MatrixXf(n_keypoints, 3);
+  for (int i = 0; i < n_keypoints; ++i) {
+    Vector3f color;
+    Utils::random_label_rgb_color(KPL_[i], &color);
+    KPC_.row(i) = color.transpose();
+  }
+
+  if (renderer_ == nullptr) {
+    LOG(WARNING) << "Renderer is not set";
+  } else {
+    renderer_->set_keypoints(KP_);
+    renderer_->set_keypoint_colors(KPC_);
+  }
+
+  return true;
+}
+
 bool LibiglMeshT::write_face_labels(const std::string& _filename) {
   if (!Utils::write_eigen_matrix_to_file(_filename, FL_)) {
     return false;
@@ -192,28 +268,9 @@ void LibiglMeshT::set_face_label_colors() {
   }
 }
 
-void LibiglMeshT::set_point_label_colors() {
-  if (PL_.rows() != P_.rows()) {
-    LOG(WARNING) << "Number of point labels does not match number of points.";
-    return;
-  }
-
-  PC_ = MatrixXf(n_points(), 3);
-  for (int pid = 0; pid < n_points(); ++pid) {
-    Vector3f color;
-    Utils::random_label_rgb_color(PL_(pid), &color);
-    PC_.row(pid) = color.transpose();
-  }
-
-  if (renderer_ == nullptr) {
-    LOG(WARNING) << "Renderer is not set";
-  } else {
-    renderer_->set_point_colors(PC_);
-  }
-}
-
 MatrixXf LibiglMeshT::compute_color_map(const VectorXf& _values) {
-  MatrixXf colors = MatrixXf(_values.size(), 3);
+  const int n_values = _values.size();
+  MatrixXf colors = MatrixXf(n_values, 3);
   colors.setZero();
 
   const float vmin = _values.minCoeff();
@@ -221,7 +278,7 @@ MatrixXf LibiglMeshT::compute_color_map(const VectorXf& _values) {
   const float dv = vmax - vmin;
 
   if (dv > 1.0e-8) {
-    for (int pid = 0; pid < n_points(); ++pid) {
+    for (int pid = 0; pid < n_values; ++pid) {
       Vector3f color = Vector3f::Ones();
       const float v = _values[pid];
 
@@ -245,6 +302,46 @@ MatrixXf LibiglMeshT::compute_color_map(const VectorXf& _values) {
   }
 
   return colors;
+}
+
+void LibiglMeshT::set_vertex_label_colors() {
+  if (VL_.rows() != V_.rows()) {
+    LOG(WARNING) << "Number of vertex labels does not match number of vertexs.";
+    return;
+  }
+
+  VC_ = MatrixXf(n_vertices(), 3);
+  for (int pid = 0; pid < n_vertices(); ++pid) {
+    Vector3f color;
+    Utils::random_label_rgb_color(VL_(pid), &color);
+    VC_.row(pid) = color.transpose();
+  }
+
+  if (renderer_ == nullptr) {
+    LOG(WARNING) << "Renderer is not set";
+  } else {
+    renderer_->set_vertex_colors(VC_);
+  }
+}
+
+void LibiglMeshT::set_point_label_colors() {
+  if (PL_.rows() != P_.rows()) {
+    LOG(WARNING) << "Number of point labels does not match number of points.";
+    return;
+  }
+
+  PC_ = MatrixXf(n_points(), 3);
+  for (int pid = 0; pid < n_points(); ++pid) {
+    Vector3f color;
+    Utils::random_label_rgb_color(PL_(pid), &color);
+    PC_.row(pid) = color.transpose();
+  }
+
+  if (renderer_ == nullptr) {
+    LOG(WARNING) << "Renderer is not set";
+  } else {
+    renderer_->set_point_colors(PC_);
+  }
 }
 
 void LibiglMeshT::update_bounding_box() {
@@ -275,6 +372,12 @@ void LibiglMeshT::pre_processing() {
     }
   }
 
+  if (FLAGS_vertex_labels != "") {
+    if (!read_vertex_labels(FLAGS_vertex_labels)) {
+      return;
+    }
+  }
+
   if (FLAGS_vertex_values != "") {
     if (!read_vertex_values(FLAGS_vertex_values)) {
       return;
@@ -301,6 +404,18 @@ void LibiglMeshT::pre_processing() {
 
   if (FLAGS_point_values != "") {
     if (!read_point_values(FLAGS_point_values)) {
+      return;
+    }
+  }
+
+  if (FLAGS_keypoints != "") {
+    if (!read_keypoints(FLAGS_keypoints)) {
+      return;
+    }
+  }
+
+  if (FLAGS_keypoint_labels != "") {
+    if (!read_keypoint_labels(FLAGS_keypoint_labels)) {
       return;
     }
   }

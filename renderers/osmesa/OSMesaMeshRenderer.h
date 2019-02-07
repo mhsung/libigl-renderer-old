@@ -9,6 +9,7 @@
 #define OSMESA_MESH_RENDERER_T_H
 
 #include <string>
+#include <vector>
 #include <Eigen/Core>
 #include <GL/osmesa.h>
 #include <GL/gl.h>
@@ -40,6 +41,9 @@ class OSMesaMeshRenderer : public LibiglMeshRendererT {
     virtual void set_points(const Eigen::MatrixXd& _P);
     virtual void set_point_colors(const Eigen::MatrixXf& _PC);
 
+    virtual void set_keypoints(const Eigen::MatrixXd& _key_P);
+    virtual void set_keypoint_colors(const Eigen::MatrixXf& _key_PC);
+
     virtual void run_loop();
     virtual bool snapshot(const std::string& _filename);
 
@@ -51,6 +55,7 @@ class OSMesaMeshRenderer : public LibiglMeshRendererT {
     void render();
     void render_mesh();
     void render_point_set();
+    void render_keypoints();
 
   private:
     OSMesaContext context_;
@@ -70,6 +75,9 @@ class OSMesaMeshRenderer : public LibiglMeshRendererT {
 
     Matrix4f projection_;
     Matrix4f modelview_;
+
+    Matrix<double, Dynamic, 3, RowMajor> key_P_;
+    Matrix<float, Dynamic, 3, RowMajor> key_PC_;
 };
 
 #endif	// OSMESA_MESH_RENDERER_T_H
