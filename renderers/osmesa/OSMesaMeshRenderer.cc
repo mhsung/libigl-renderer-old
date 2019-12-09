@@ -220,6 +220,9 @@ void OSMesaMeshRenderer::render() {
   glShadeModel(GL_SMOOTH);
   glEnable(GL_LIGHTING);
 
+  glCullFace(GL_FRONT_AND_BACK);
+  glEnable(GL_NORMALIZE);
+
   render_point_set();
   render_keypoints();
   render_mesh();

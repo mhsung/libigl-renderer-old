@@ -16,21 +16,20 @@
 #endif
 
 
+DEFINE_int32(image_width, 1920, "image width.");
+DEFINE_int32(image_height, 1080, "image height.");
+
+
 int main(int argc, char *argv[]) {
   google::ParseCommandLineFlags(&argc, &argv, true);
-
-  const int kWidth = 800;
-  const int kHeight = 600;
-  //const int kWidth = 1920;
-  //const int kHeight = 1080;
 
   LibiglMeshRendererT* renderer = nullptr;
 
 #ifdef USE_OSMESA
-  OSMesaMeshRenderer osmesa_renderer(kWidth, kHeight);
+  OSMesaMeshRenderer osmesa_renderer(FLAGS_image_width, FLAGS_image_height);
   renderer = &osmesa_renderer;
 #else
-  LibiglMeshViewer libigl_renderer(kWidth, kHeight);
+  LibiglMeshViewer libigl_renderer(FLAGS_image_width, FLAGS_image_height);
   renderer = &libigl_renderer;
 #endif
 
