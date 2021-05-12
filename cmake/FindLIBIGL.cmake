@@ -20,8 +20,6 @@ find_path(LIBIGL_INCLUDE_DIR igl/readOBJ.h
         ${CMAKE_SOURCE_DIR}/libigl
         ${CMAKE_SOURCE_DIR}/../libigl
         ${CMAKE_SOURCE_DIR}/../../libigl
-        # @mhsung: Added.
-        ${CMAKE_SOURCE_DIR}/../../lib/libigl/include
         /usr
         /usr/local
         /usr/local/igl/libigl
